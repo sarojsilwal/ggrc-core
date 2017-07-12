@@ -9,7 +9,7 @@ cd "${CURRENT_SCRIPTPATH}/../"
 ./git_hooks/post-checkout
 
 CONFIG_PREFIX="./extras/deploy/"
-PROJECT_NAME="ggrc-dev"
+PROJECT_NAME="ggrc-sandbox"
 CONFIG_DIR="$CONFIG_PREFIX/$PROJECT_NAME/"
 
 mkdir -p "$CONFIG_DIR"
