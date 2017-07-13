@@ -1,15 +1,14 @@
 #!/bin/bash
 
-. /tmpfs/src/gfile/some_config
+./tmpfs/src/gfile/settings
 
-CURRENT_SCRIPTPATH=$( cd "$(dirname "$0")" ; pwd -P )
 $CURRENT_SCRIPTPATH/install_deps.sh
 
 cd "${CURRENT_SCRIPTPATH}/../"
 ./git_hooks/post-checkout
 
 CONFIG_PREFIX="./extras/deploy/"
-PROJECT_NAME="ggrc-sandbox"
+PROJECT_NAME="$APPENGINE_INSTANCE"
 CONFIG_DIR="$CONFIG_PREFIX/$PROJECT_NAME/"
 
 mkdir -p "$CONFIG_DIR"
@@ -74,7 +73,7 @@ BOOTSTRAP_ADMIN_USERS="$BOOTSTRAP_ADMIN_USERS"
 MIGRATOR="$MIGRATOR"
 RISK_ASSESSMENT_URL="$RISK_ASSESSMENT_URL"
 ABOUT_URL="https://www.google.com"
-ABOUT_TEXT="About GGRC"
+ABOUT_TEXT="$ABOUT_TXT"
 EXTERNAL_HELP_URL="$EXTERNAL_HELP_URL"
 INSTANCE_CLASS="$INSTANCE_CLASS"
 MAX_INSTANCES="$MAX_INSTANCES"
