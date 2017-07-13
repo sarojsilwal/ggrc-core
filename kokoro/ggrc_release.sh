@@ -3,7 +3,7 @@
 . /tmpfs/src/gfile/some_config
 
 CURRENT_SCRIPTPATH=$( cd "$(dirname "$0")" ; pwd -P )
-$CURRENT_SCRIPTPATH/install_deps.sh
+#$CURRENT_SCRIPTPATH/install_deps.sh
 
 cd "${CURRENT_SCRIPTPATH}/../"
 ./git_hooks/post-checkout
