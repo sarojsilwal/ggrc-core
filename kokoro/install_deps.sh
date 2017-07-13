@@ -4,6 +4,10 @@
 echo "MySQL service status"
 sudo service mysql status
 
-sudo /etc/init.d/apparmor stop
-sudo /etc/init.d/apparmor teardown
-sudo update-rc.d -f apparmor remove
+# sudo /etc/init.d/apparmor stop
+# sudo /etc/init.d/apparmor teardown
+# sudo update-rc.d -f apparmor remove
+
+sudo apt-get purge mysql*
+sudo apt-get autoremove
+sudo apt-get autoclean
