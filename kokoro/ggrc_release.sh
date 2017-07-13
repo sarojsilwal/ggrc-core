@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./tmpfs/src/gfile/settings
+. /tmpfs/src/gfile/settings
 
 $CURRENT_SCRIPTPATH/install_deps.sh
 

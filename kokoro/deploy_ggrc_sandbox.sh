@@ -1,6 +1,7 @@
 #!/bin/bash
 
-mv ./tmpfs/src/gfile/settings_ggrc_sandbox ./tmpfs/src/gfile/settings
+echo "Renaming settings"
+mv /tmpfs/src/gfile/settings_ggrc_sandbox /tmpfs/src/gfile/settings
 
 CURRENT_SCRIPTPATH=$( cd "$(dirname "$0")" ; pwd -P )
 export ABOUT_TXT='About ggrc sandbox'
