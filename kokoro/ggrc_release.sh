@@ -96,4 +96,5 @@ export GGRC_SETTINGS_MODULE="$SETTINGS_MODULE"
 export GGRC_DATABASE_URI="$GGRC_DATABASE_URI"
 EOF
 
-./bin/deploy ggrc-sandbox
+echo 'Test successfull..hehe'
+./bin/deploy $APPENGINE_INSTANCE
