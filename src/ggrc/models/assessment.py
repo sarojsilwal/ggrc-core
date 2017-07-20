@@ -111,6 +111,9 @@ class Assessment(Roleable, statusable.Statusable, AuditRelationship,
   audit_id = deferred(
       db.Column(db.Integer, db.ForeignKey('audits.id'), nullable=False),
       'Assessment')
+  assessment_type = deferred(
+      db.Column(db.String, nullable=False, server_default="Control"),
+      "Assessment")
 
   @declared_attr
   def object_level_definitions(cls):  # pylint: disable=no-self-argument
@@ -146,6 +149,7 @@ class Assessment(Roleable, statusable.Statusable, AuditRelationship,
       'design',
       'operationally',
       'audit',
+      'assessment_type',
       PublishOnly('archived'),
       PublishOnly('object')
   ]
@@ -196,6 +200,10 @@ class Assessment(Roleable, statusable.Statusable, AuditRelationship,
           "ignore_on_update": True,
           "filter_by": "_ignore_filter",
           "type": reflection.AttributeInfo.Type.MAPPING,
+      },
+      "assessment_type": {
+          "display_name": "Assessment Type",
+          "mandatory": False,
       },
       "url": "Assessment URL",
       "design": "Conclusion: Design",
@@ -266,6 +274,18 @@ class Assessment(Roleable, statusable.Statusable, AuditRelationship,
   def validate_design(self, key, value):
     # pylint: disable=unused-argument
     return self.validate_conclusion(value)
+
+  @validates("assessment_type")
+  def validate_assessment_type(self, key, value):
+    """Validate assessment type to be the same as existing model name"""
+    # pylint: disable=unused-argument
+    # pylint: disable=no-self-use
+    from ggrc.snapshotter.rules import Types
+    if value and value not in Types.all:
+      raise ValueError(
+          "Assessment type '{}' is not snapshotable".format(value)
+      )
+    return value
 
   @classmethod
   def _ignore_filter(cls, _):

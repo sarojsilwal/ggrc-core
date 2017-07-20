@@ -88,7 +88,6 @@
         'Issues', 'Assessments']
     },
     tree_view_options: {
-      header_view: GGRC.mustache_path + '/base_objects/tree_header.mustache',
       attr_view: GGRC.mustache_path + '/audits/tree-item-attr.mustache',
       attr_list: [{
         attr_title: 'Title',
@@ -334,7 +333,7 @@
       test_plan_procedure: false,
       template_object_type: 'Control',
       default_people: {
-        assessors: 'Audit Lead',
+        assessors: '',
         verifiers: 'Auditors'
       },
       // the custom lists of assessor / verifier IDs if "other" is selected for
@@ -364,6 +363,7 @@
     init: function () {
       this._super.apply(this, arguments);
       this.validateNonBlank('title');
+      this.validateNonBlank('default_people.assessors');
 
       this.validateListNonBlank(
         'assessorsList',
@@ -595,15 +595,7 @@
      */
     _choosableObjectTypes: function () {
       var ignoreTypes = this._NON_RELEVANT_OBJ_TYPES;
-      var mapper;
-      var MapperModel = GGRC.Models.MapperModel;
-      var objectTypes;
-
-      mapper = new MapperModel({
-        object: 'MultitypeSearch',
-        search_only: true
-      });
-      objectTypes = mapper.initTypes('AssessmentTemplate');
+      var objectTypes = GGRC.Mappings.getMappingTypes('AssessmentTemplate');
       // remove ignored types and sort the rest
       _.each(objectTypes, function (objGroup) {
         objGroup.items = _.filter(objGroup.items, function (item) {

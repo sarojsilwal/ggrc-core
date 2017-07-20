@@ -218,6 +218,16 @@
                     that, 'modal:success', {arr: can.makeArray(arguments)});
                   el.trigger('modal:success', {arr: can.makeArray(arguments)});
                 });
+              })
+              .fail(function () {
+                // This case happens when user have no access to write in audit folder
+                var error = _.last(arguments);
+                if (error && error.code === 403) {
+                  GGRC.Errors.notifier('error', GGRC.Errors.messages[403]);
+
+                  can.trigger(that, 'modal:success');
+                  el.trigger('modal:success');
+                }
               });
           });
       },

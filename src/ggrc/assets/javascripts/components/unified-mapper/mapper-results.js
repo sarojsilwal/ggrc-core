@@ -30,7 +30,6 @@
         key: '',
         direction: DEFAULT_SORT_DIRECTION
       },
-      mapper: null,
       isLoading: false,
       items: [],
       allItems: [],
@@ -49,6 +48,14 @@
         instance: null,
         show: false
       },
+      searchOnly: false,
+      useSnapshots: false,
+      newEntries: [],
+      entries: [],
+      afterSearch: false,
+      relevant: [],
+      objectGenerator: false,
+      deferredList: [],
       init: function () {
         var self = this;
         this.attr('submitCbs').add(this.onSearch.bind(this, true));
@@ -59,32 +66,22 @@
       destroy: function () {
         this.attr('submitCbs').remove(this.onSearch.bind(this));
       },
-      searchOnly: function () {
-        return this.attr('mapper.search_only');
-      },
-      useSnapshots: function () {
-        return this.attr('mapper.useSnapshots');
-      },
       showNewEntries: function () {
         var self = this;
-        var newEntries;
         var sortKey = 'updated_at';
         var sortDirection = 'desc';
+        var newEntries = this.attr('newEntries').map(function (value) {
+          return {
+            id: value.id,
+            type: value.type,
+            data: self.transformValue(value),
+            isSelected: true,
+            markedSelected: true
+          };
+        });
 
-        if (this.attr('mapper.newEntries')) {
-          newEntries = this.attr('mapper.newEntries').map(function (value) {
-            return {
-              id: value.id,
-              type: value.type,
-              data: self.transformValue(value),
-              isSelected: true,
-              markedSelected: true
-            };
-          });
-
-          // select new entries
-          this.attr('selected').push.apply(this.attr('selected'), newEntries);
-        }
+        // select new entries
+        this.attr('selected').push.apply(this.attr('selected'), newEntries);
 
         // clear filter
         this.attr('filter', '');
@@ -104,14 +101,14 @@
         this.attr('paging.current', 1);
 
         // display results
-        this.attr('mapper.afterSearch', true);
+        this.attr('afterSearch', true);
       },
       setItems: function () {
         var self = this;
         return self.load()
           .then(function (items) {
             self.attr('items', items);
-            self.attr('mapper.entries', items.map(function (item) {
+            self.attr('entries', items.map(function (item) {
               return item.data;
             }));
             self.setColumnsConfiguration();
@@ -131,7 +128,7 @@
       },
       setRelatedAssessments: function () {
         var Model = this.getDisplayModel();
-        if (this.useSnapshots()) {
+        if (this.attr('useSnapshots')) {
           this.attr('relatedAssessments.show', false);
           return;
         }
@@ -152,7 +149,7 @@
       },
       prepareRelevantFilters: function () {
         var filters;
-        var relevantList = this.attr('mapper.relevant');
+        var relevantList = this.attr('relevant');
 
         filters = relevantList.attr()
           .map(function (relevant) {
@@ -210,15 +207,13 @@
         return GGRC.query_parser.parse(filterString);
       },
       shouldApplyUnlockedFilter: function (modelName) {
-        return modelName === 'Audit' &&
-          !this.searchOnly();
+        return modelName === 'Audit' && !this.attr('searchOnly');
       },
       loadAllItems: function () {
         this.attr('allItems', this.loadAllItemsIds());
       },
       getQuery: function (queryType, addPaging) {
         var modelName = this.attr('type');
-        var useSnapshots = this.useSnapshots();
         var paging = {
           filter: this.attr('filter')
         };
@@ -243,27 +238,27 @@
 
         query = this.prepareBaseQuery(modelName, paging, filters, statusFilter);
         relatedQuery = this.prepareRelatedQuery(modelName, statusFilter);
-        if (useSnapshots) {
+        if (this.attr('useSnapshots')) {
           // Transform Base Query to Snapshot
           query = GGRC.Utils.Snapshots.transformQuery(query);
         }
 
         // Add Permission check
-        query.permissions = (modelName === 'Person') || this.searchOnly() ?
-          'read' : 'update';
+        query.permissions = (modelName === 'Person') ||
+          this.attr('searchOnly') ? 'read' : 'update';
         query.type = queryType || 'values';
 
         if (!relatedQuery) {
           return {data: [query]};
         }
-        if (useSnapshots) {
+        if (this.attr('useSnapshots')) {
           // Transform Related Query to Snapshot
           relatedQuery = GGRC.Utils.Snapshots.transformQuery(relatedQuery);
         }
         return {data: [query, relatedQuery]};
       },
       getModelKey: function () {
-        return this.useSnapshots() ?
+        return this.attr('useSnapshots') ?
           CMS.Models.Snapshot.model_singular :
           this.attr('type');
       },
@@ -274,8 +269,7 @@
         return CMS.Models[this.attr('type')];
       },
       setDisabledItems: function (allItems, relatedIds) {
-        if (this.searchOnly() ||
-            this.attr('mapper.assessmentGenerator')) {
+        if (this.attr('searchOnly') || this.attr('objectGenerator')) {
           return;
         }
         allItems.forEach(function (item) {
@@ -304,8 +298,7 @@
       },
       transformValue: function (value) {
         var Model = this.getDisplayModel();
-        var useSnapshots = this.useSnapshots();
-        if (useSnapshots) {
+        if (this.attr('useSnapshots')) {
           value.snapshotObject =
             GGRC.Utils.Snapshots.toObject(value);
           value.revision.content =
@@ -351,7 +344,7 @@
         return dfd;
       },
       buildRelatedData: function (relatedData, type) {
-        var deferredList = this.attr('mapper.deferred_list');
+        var deferredList = this.attr('deferredList');
         var ids;
 
         if (!deferredList || !deferredList.length) {
@@ -398,8 +391,8 @@
                 type: modelKey
               };
             });
-            // Do not perform extra mapping validation in case Assessment generation
-            if (!this.attr('mapper.assessmentGenerator') && relatedData) {
+            // Do not perform extra mapping validation in case object generation
+            if (!this.attr('objectGenerator') && relatedData) {
               result = result.filter(function (item) {
                 return relatedData[modelKey].ids.indexOf(item.id) < 0;
               });

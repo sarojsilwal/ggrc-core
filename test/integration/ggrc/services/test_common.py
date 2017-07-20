@@ -3,6 +3,8 @@
 
 """Tests for /api/<model> endpoints."""
 
+import mock
+
 import json
 import time
 from urlparse import urlparse
@@ -95,7 +97,8 @@ class TestServices(TestCase):
     self.assert_required_headers(response)
     return response
 
-  def test_put_successful(self):
+  @mock.patch("ggrc.views.start_compute_attributes")
+  def test_put_successful(self, _):
     """PUT with correct headers and data succeeds and returns new object."""
     response = self._prepare_model_for_put(foo_param="buzz")
     obj = response.json

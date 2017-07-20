@@ -777,14 +777,15 @@ class Resource(ModelView):
     with benchmark("Serialize object"):
       object_for_json = self.object_for_json(obj)
 
+    obj_etag = etag(self.modified_at(obj), get_info(obj))
     if 'If-None-Match' in self.request.headers and \
-       self.request.headers['If-None-Match'] == etag(object_for_json):
+       self.request.headers['If-None-Match'] == obj_etag:
       with benchmark("Make response"):
         return current_app.make_response(
-            ('', 304, [('Etag', etag(object_for_json))]))
+            ('', 304, [('Etag', obj_etag)]))
     with benchmark("Make response"):
       return self.json_success_response(
-          object_for_json, self.modified_at(obj))
+          object_for_json, self.modified_at(obj), obj_etag=obj_etag)
 
   def validate_headers_for_put_or_delete(self, obj):
     """rfc 6585 defines a new status code for missing required headers"""
@@ -800,7 +801,7 @@ class Resource(ModelView):
           [("Content-Type", "application/json")],
       ))
 
-    object_etag = etag(self.object_for_json(obj))
+    object_etag = etag(self.modified_at(obj), get_info(obj))
     object_timestamp = self.http_timestamp(self.modified_at(obj))
     if (request.headers["If-Match"] != object_etag or
             request.headers["If-Unmodified-Since"] != object_timestamp):
@@ -876,6 +877,8 @@ class Resource(ModelView):
       db.session.commit()
     with benchmark("Query for object"):
       obj = self.get_object(id)
+    with benchmark("Serialize collection"):
+      object_for_json = self.object_for_json(obj)
     with benchmark("Update index"):
       update_snapshot_index(db.session, modified_objects)
     with benchmark("Update memcache after commit for collection PUT"):
@@ -888,11 +891,12 @@ class Resource(ModelView):
       db.session.commit()
       if self.has_cache():
         self.invalidate_cache_to(obj)
-    with benchmark("Serialize collection"):
-      object_for_json = self.object_for_json(obj)
+    with benchmark("Send event job"):
+      send_event_job(event)
     with benchmark("Make response"):
       return self.json_success_response(
-          object_for_json, self.modified_at(obj))
+          object_for_json, self.modified_at(obj),
+          obj_etag=etag(self.modified_at(obj), get_info(obj)))
 
   def delete(self, id):
     if 'X-Appengine-Taskname' not in request.headers:
@@ -942,6 +946,8 @@ class Resource(ModelView):
             obj.__class__, obj=obj, service=self, event=event)
       with benchmark("Query for object"):
         object_for_json = self.object_for_json(obj)
+      with benchmark("Send event job"):
+        send_event_job(event)
       with benchmark("Make response"):
         result = self.json_success_response(
             object_for_json, self.modified_at(obj))
@@ -1303,6 +1309,8 @@ class Resource(ModelView):
         # Note: In model_posted_after_commit necessary mapping and
         # relationships are set, so need to commit the changes
       db.session.commit()
+    with benchmark("Send event job"):
+      send_event_job(event)
 
   @staticmethod
   def _make_error_from_exception(exc):
@@ -1510,23 +1518,20 @@ class Resource(ModelView):
     return format_date_time(time.mktime(timestamp.utctimetuple()))
 
   def json_success_response(self, response_object, last_modified,
-                            status=200, id=None, cache_op=None):
+                            status=200, id=None, cache_op=None,
+                            obj_etag=None):
     headers = [
         ('Last-Modified', self.http_timestamp(last_modified)),
-        ('Etag', etag(response_object)),
         ('Content-Type', 'application/json'),
     ]
+    if obj_etag:
+      headers.append(('Etag', obj_etag))
     if id is not None:
       headers.append(('Location', self.url_for(id=id)))
     if cache_op:
       headers.append(('X-GGRC-Cache', cache_op))
     return current_app.make_response(
         (self.as_json(response_object), status, headers))
-
-  def getval(self, src, attr, *args):
-    if args:
-      return src.get(unicode(attr), *args)
-    return src.get(unicode(attr))
 
 
 class ReadOnlyResource(Resource):
@@ -1627,7 +1632,12 @@ def _is_creator():
       and current_user.system_wide_role == "Creator"
 
 
-def etag(last_modified):
+def get_info(obj):
+  """Get object info string."""
+  return '%s %s' % (obj.__class__.__name__, str(obj.id))
+
+
+def etag(last_modified, info=''):
   """Generate the etag given a datetime for the last time the resource was
   modified. This isn't as good as an etag generated off of a hash of the
   representation, but, it doesn't require the representation in order to be
@@ -1640,4 +1650,11 @@ def etag(last_modified):
       the time object needs to be sufficient such that you don't end up with
       the same etag due to two updates performed in rapid succession.
   """
-  return '"{0}"'.format(hashlib.sha1(str(last_modified)).hexdigest())
+  return '"{0}"'.format(hashlib.sha1(str(last_modified) + info).hexdigest())
+
+
+def send_event_job(event):
+  """Create bacground job for handling new revisions."""
+  revision_ids = [revision.id for revision in event.revisions]
+  from ggrc import views
+  views.start_compute_attributes(revision_ids)

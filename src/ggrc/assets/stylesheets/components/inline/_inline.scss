@@ -1,0 +1,124 @@
+/*
+ * Copyright (C) 2017 Google Inc.
+ * Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+ */
+
+inline-edit-control {
+  .inline {
+    .inline__header {
+      display: flex;
+      align-items: center;
+      line-height: 28px;
+      min-height: 28px;
+
+      label {
+        margin: 0;
+      }
+
+      .inline__header-spinner {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        left: -28px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .inline__content-wrapper {
+      position: relative;
+    }
+
+    .inline__content {
+      border-radius: 2px;
+      width: 100%;
+      box-sizing: border-box;
+      display: block;
+      min-width: 120px;
+      position: relative;
+      border: 1px solid transparent;
+
+      p {
+        margin: 0;
+        padding: 0;
+      }
+
+      &.inline--hidden {
+        opacity: 0;
+        max-height: 424px;
+      }
+
+      &.inline--active {
+        border-radius: 2px 2px 0 2px;
+        padding: 2px 2px 2px 4px;
+        border: 1px solid $warmGray;
+        position: absolute;
+        z-index: 1;
+        background: $white;
+        line-height: 18px;
+
+        &:hover {
+          .inline__controls {
+            height: 32px;
+          }
+        }
+      }
+
+      .inline-input {
+        width: 100%;
+        margin-bottom: 0;
+        height: 26px;
+        box-sizing: border-box;
+        border: none;
+        box-shadow: none;
+      }
+
+      .inline-text-area {
+        margin-bottom: 0;
+        .rich-text__wrapper {
+          border-radius: 0;
+          border: none;
+          margin: -2px -2px -2px -4px;
+        }
+      }
+
+      select {
+        margin-bottom: 0;
+      }
+    }
+
+    .inline__controls {
+      display: block;
+      position: absolute;
+      text-align: center;
+      border-left: 1px solid $warmGray;
+      top: auto;
+      right: -1px;
+      border: 1px solid $warmGray;
+      border-top: none;
+      background: $white;
+      box-sizing: border-box;
+      height: 32px;
+      bottom: -33px;
+      line-height: 32px;
+      margin: 0;
+      padding: 0;
+      width: 70px;
+      z-index: 1;
+
+      .inline__controls-item {
+        display: inline-block;
+        box-sizing: border-box;
+        width: 32px;
+        line-height: 31px;
+      }
+      .inline__controls-link {
+        opacity: 0.6;
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

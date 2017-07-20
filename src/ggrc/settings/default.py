@@ -35,7 +35,7 @@ try:
 except (ImportError):
   pass
 
-VERSION = "0.10.22-Raspberry" + BUILD_NUMBER
+VERSION = "0.10.24-Raspberry" + BUILD_NUMBER
 
 # Migration owner
 MIGRATOR = os.environ.get(
@@ -114,6 +114,9 @@ LOGGING_LOGGERS = {
     "werkzeug": "INFO",
     # WARNING - logs warnings and errors only
     # INFO    - logs HTTP-queries
+
+    # "ggrc.utils.benchmarks": "DEBUG"
+    # DEBUG - logs all benchmarks
 }
 
 

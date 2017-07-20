@@ -8,14 +8,12 @@
     defaults: {
       widget_descriptors: null
     }
-
   }, {
     init: function (el, options) {
       CMS.Models.DisplayPrefs.getSingleton().then(function (prefs) {
         this.display_prefs = prefs;
 
         this.init_tree_view_settings();
-        this.initCurrentRelatedInstanses();
         this.init_page_title();
         this.init_page_help();
         this.init_page_header();
@@ -60,21 +58,6 @@
     '[data-toggle="modal-ajax-form"] click': 'disableAll',
     '[data-toggle="unified-search"] click': 'disableAll',
     '[data-toggle="unified-mapper"] click': 'disableAll',
-
-    initCurrentRelatedInstanses: function () {
-      var instance;
-      if (!GGRC.Utils.CurrentPage.isObjectContextPage()) {
-        return;
-      }
-
-      instance = this.options.instance;
-
-      GGRC.Utils.CurrentPage.initMappedInstances(
-        GGRC.Mappings.getMappingList(instance.type), {
-          type: instance.type,
-          id: instance.id
-        });
-    },
 
     init_page_title: function () {
       var pageTitle = null;

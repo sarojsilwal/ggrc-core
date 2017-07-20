@@ -1,0 +1,40 @@
+{{!
+  Copyright (C) 2017 Google Inc.
+  Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+}}
+
+{{#switch type}}
+  {{#case 'text'}}
+    {{> /static/mustache/components/inline/simple-readonly-text.mustache}}
+  {{/case}}
+
+  {{#case 'input'}}
+    {{> /static/mustache/components/inline/simple-readonly-text.mustache}}
+  {{/case}}
+
+  {{#case 'dropdown'}}
+    {{> /static/mustache/components/inline/simple-readonly-text.mustache}}
+  {{/case}}
+
+  {{#case 'checkbox'}}
+    <input disabled type="checkbox" can-value="context.value">
+  {{/case}}
+
+  {{#case 'date'}}
+    <div class="inline-edit__text">
+      {{#if context.value}}
+        {{date context.value true}}
+      {{else}}
+        <span class="empty-message">None</span>
+      {{/if}}
+    </div>
+  {{/case}}
+
+  {{#case 'person'}}
+    {{#if context.value}}
+      <person-info {person-obj}="context.value"></person-info>
+    {{else}}
+      <span class="empty-message">No person</span>
+    {{/if}}
+  {{/case}}
+{{/switch}}

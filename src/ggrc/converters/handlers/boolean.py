@@ -19,24 +19,41 @@ class CheckboxColumnHandler(handlers.ColumnHandler):
   and False.
   """
 
-  TRUE_VALUES = {"yes", "true"}
-  FALSE_VALUES = {"no", "false"}
-  NONE_VALUES = {"--", "---"}
-  IGNORED_VALUES = {"", }
-  ALLOWED_VALUES = TRUE_VALUES | FALSE_VALUES | NONE_VALUES | IGNORED_VALUES
   _true = "yes"
   _false = "no"
+  TRUE_VALUES = {_true, "true"}
+  FALSE_VALUES = {_false, "false"}
+  NONE_VALUES = {"--", "---"}
+  IGNORED_VALUES = {"", }
+
+  @property
+  def raw_column_value(self):
+    return self.raw_value.lower().strip()
 
   def parse_item(self):
     """ mandatory checkboxes will get evelauted to false on empty value """
-    value = self.raw_value.lower() in self.TRUE_VALUES
-    if self.raw_value in self.NONE_VALUES:
-      value = None
-    if self.raw_value.lower() not in self.ALLOWED_VALUES:
+    raw_value = self.raw_column_value
+    if raw_value in self.TRUE_VALUES:
+      return True
+    if raw_value in self.FALSE_VALUES:
+      return False
+    if raw_value in self.NONE_VALUES:
+      return None
+    if raw_value in self.IGNORED_VALUES:
+      # if obj exists or column can be empty than set_empty = True
+      self.set_empty = bool(self.row_converter.obj.id or not self.mandatory)
+    if self.set_empty:
+      return
+    if not self.mandatory:
       self.add_warning(errors.WRONG_VALUE, column_name=self.display_name)
-    if self.raw_value in self.IGNORED_VALUES:
       self.set_empty = True
-    return value
+      return
+    if raw_value in self.IGNORED_VALUES:
+      error_msg = errors.MISSING_VALUE_ERROR
+    else:
+      error_msg = errors.WRONG_VALUE_ERROR
+    self.add_error(error_msg, column_name=self.display_name)
+    self.row_converter.set_ignore()
 
   def get_value(self):
     val = getattr(self.row_converter.obj, self.key, False)
@@ -74,19 +91,25 @@ class KeyControlColumnHandler(CheckboxColumnHandler):
   dropdown menu that contains key, non-key and --- as values.
   """
 
-  TRUE_VALUES = {"key"}
-  FALSE_VALUES = {"non-key", }
-  NONE_VALUES = {"--", "---"}
-  IGNORED_VALUES = {"", }
-  ALLOWED_VALUES = TRUE_VALUES | FALSE_VALUES | NONE_VALUES | IGNORED_VALUES
   _true = "key"
   _false = "non-key"
+  TRUE_VALUES = {_true, }
+  FALSE_VALUES = {_false, }
 
 
 class StrictBooleanColumnHandler(CheckboxColumnHandler):
-  """Handler for strict boolean values. """
-  ALLOWED_VALUES = {"true", "false"}
-  TRUE_VALUES = {"true"}
-  NONE_VALUES = set()
+  """Handler for strict boolean values.
+
+  You can sent only true, false, and empty string values.
+  If you send true in model will send boolean True.
+  If you send false in model will send boolean Flase.
+  If you send empty string, and model already exists column will be skipped.
+  If you send empty string and not existing instance and column is mandatory,
+  Will be raised exception.
+
+  """
   _true = "true"
   _false = "false"
+  TRUE_VALUES = {_true, }
+  FALSE_VALUES = {_false, }
+  NONE_VALUES = set()  # Radical, only true or false

@@ -158,7 +158,7 @@
       this.hide(e);
     },
 
-    hide: function (e) {
+    hide: function (e, verifyChanges) {
       var instance = this.instance;
       var pending;
       var hasPending;
@@ -169,7 +169,8 @@
       }
 
       // If the hide was initiated by the backdrop, check for dirty form data before continuing
-      if (e && $(e.target).is('.modal-backdrop,.fa-times')) {
+      // Same behavior if extra flag is sent
+      if (e && $(e.target).is('.modal-backdrop,.fa-times') || verifyChanges) {
         if ($(e.target).is('.disabled')) {
             // In the case of a disabled modal backdrop, treat it like any other disabled data-dismiss,
             //  i.e. do nothing.
@@ -189,7 +190,8 @@
             // Confirm that the user wants to lose the data prior to hiding
           GGRC.Controllers.Modals.confirm({
             modal_title: 'Discard Changes',
-            modal_description: 'Are you sure that you want to discard your changes?',
+            modal_description: 'Are you sure that you want' +
+            ' to discard your changes?',
             modal_confirm: 'Discard',
             skip_refresh: true
           }, function () {

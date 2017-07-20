@@ -35,8 +35,10 @@ class TestProgramPage(base.Test):
     object id.
     """
     _, program_info_page = new_program_ui
-    assert (url.PROGRAMS + "/" + program_info_page.source_obj_id_from_url in
-            program_info_page.url)
+    expected_url = (
+        url.PROGRAMS + "/" + program_info_page.source_obj_id_from_url)
+    actual_url = program_info_page.url
+    assert expected_url in actual_url
 
   @pytest.mark.smoke_tests
   def test_info_tab_is_active_by_default(self, new_program_ui,
@@ -49,27 +51,30 @@ class TestProgramPage(base.Test):
     """
     _, program_info_page = new_program_ui
     program_info_page.navigate_to()
-    assert (my_work_dashboard.get_active_widget_name() ==
-            element.ProgramInfoWidget().WIDGET_HEADER)
+    expected_widget_name = element.ProgramInfoWidget().WIDGET_HEADER
+    actual_widget_name = my_work_dashboard.get_active_widget_name()
+    assert expected_widget_name == actual_widget_name
 
   @pytest.mark.smoke_tests
   def test_info_tab_contains_entered_data(self, new_program_ui):
     """Verify that created object contains data we've entered
     into modal."""
     modal, program_info_page = new_program_ui
-    assert (test_utils.HtmlParser.parse_text(modal.ui_title.text) ==
-            program_info_page.title_entered().text)
-    assert (modal.ui_description.text ==
-            program_info_page.description_entered.text)
-    assert modal.ui_notes.text == program_info_page.notes_entered.text
-    assert modal.ui_code.text == program_info_page.code_entered.text
-    assert (modal.ui_program_url.text ==
-            program_info_page.program_url_entered.text)
-    assert (modal.ui_reference_url.text ==
-            program_info_page.reference_url_entered.text)
-    assert (modal.ui_effective_date.text ==
-            program_info_page.effective_date_entered.text)
-    assert modal.ui_stop_date.text == program_info_page.stop_date_entered.text
+    expected_list_texts = [
+        test_utils.HtmlParser.parse_text(modal.ui_title.text),
+        modal.ui_description.text, modal.ui_notes.text, modal.ui_code.text,
+        modal.ui_program_url.text, modal.ui_reference_url.text,
+        modal.ui_effective_date.text, modal.ui_stop_date.text]
+    actual_list_texts = [
+        program_info_page.title_entered().text,
+        program_info_page.description_entered.text,
+        program_info_page.notes_entered.text,
+        program_info_page.code_entered.text,
+        program_info_page.program_url_entered.text,
+        program_info_page.reference_url_entered.text,
+        program_info_page.effective_date_entered.text,
+        program_info_page.stop_date_entered.text]
+    assert expected_list_texts == actual_list_texts
 
   @pytest.mark.smoke_tests
   def test_permalink(self, selenium, new_program_ui):
@@ -85,7 +90,9 @@ class TestProgramPage(base.Test):
     # test generated link
     modal = program_info_page.open_info_3bbs().select_edit()
     modal.ui_title.paste_from_clipboard(modal.ui_description)
-    assert modal.ui_title.text == program_info_page.url
+    expected_url = program_info_page.url
+    actual_url = modal.ui_title.text
+    assert expected_url in actual_url
 
   @pytest.mark.smoke_tests
   def test_edit_modal(self, selenium, new_program_ui):
@@ -100,12 +107,14 @@ class TestProgramPage(base.Test):
     modal.save_and_close()
     selenium_utils.open_url(selenium, program_info_page.url)
     updated_program_info_page = info_widget.Programs(selenium)
-    assert (test_utils.HtmlParser.parse_text(modal.ui_title.text) ==
-            updated_program_info_page.title_entered().text)
-    assert (modal.ui_description.text ==
-            updated_program_info_page.description_entered.text)
-    assert modal.ui_notes.text == updated_program_info_page.notes_entered.text
-    assert (modal.ui_program_url.text ==
-            updated_program_info_page.program_url_entered.text)
-    assert (modal.ui_reference_url.text ==
-            updated_program_info_page.reference_url_entered.text)
+    expected_list_texts = [
+        test_utils.HtmlParser.parse_text(modal.ui_title.text),
+        modal.ui_description.text, modal.ui_notes.text,
+        modal.ui_program_url.text, modal.ui_reference_url.text]
+    actual_list_texts = [
+        updated_program_info_page.title_entered().text,
+        updated_program_info_page.description_entered.text,
+        updated_program_info_page.notes_entered.text,
+        updated_program_info_page.program_url_entered.text,
+        updated_program_info_page.reference_url_entered.text]
+    assert expected_list_texts == actual_list_texts

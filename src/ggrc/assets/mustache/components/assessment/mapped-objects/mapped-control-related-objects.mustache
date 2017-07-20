@@ -9,10 +9,14 @@
             <object-list {items}="items">
                 <div class="flex-size-1">
                     <h6>Title</h6>
-                    <a target="_blank" href="{{originalLink}}" title="{{title}}">{{title}}</a>
-                    <span class="state-value snapshot">
+                    <div class="simple-modal__title">
+                        <div class="simple-modal__title__name">
+                            <a target="_blank" href="{{originalLink}}" title="{{title}}">{{title}}</a>
+                        </div>
+                        <span class="state-value snapshot">
                             {{type}} version as on {{date updated_at}}
                         </span>
+                    </div>
                 </div>
                 <div class="flex-size-1">
                     <h6>Description</h6>

@@ -1,0 +1,17 @@
+{{!
+  Copyright (C) 2017 Google Inc.
+  Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+}}
+
+<div class="inline__header action-toolbar">
+  <!-- header (laber/h1-6) -->
+  <content></content>
+
+  {{#if isEditIconAllowed}}
+    <div class="action-toolbar__controls">
+      <action-toolbar-control>
+        <i class="fa fa-pencil inline-edit-icon"></i>
+      </action-toolbar-control>
+    </div>
+  {{/if}}
+ </div>

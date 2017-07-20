@@ -12,11 +12,15 @@
 <simple-modal instance="snapshot" modal-title="modalTitle" state="state" extra-css-class="mapped-controls-info" replace-content="true">
     <div class="simple-modal__header flex-box flex-row">
         <div class="simple-modal__header-text flex-size-1">
-            Control:
-            <a target="_blank" href="{{instance.originalLink}}" title="{{instance.title}}">{{instance.title}}</a>
-            <span class="state-value snapshot">
-                {{instance.type}} version as on {{date instance.updated_at}}
-            </span>
+            <div class="simple-modal__title">
+                <div class="simple-modal__title__name">
+                    Control:
+                    <a target="_blank" href="{{instance.originalLink}}" title="{{instance.title}}">{{instance.title}}</a>
+                </div>
+                <span class="state-value snapshot">
+                    {{instance.type}} version as on {{date instance.updated_at}}
+                </span>
+            </div>
         </div>
         <button class="btn btn-small btn-icon" can-click="hide">
             <i class="fa fa-times black"></i>

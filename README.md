@@ -31,15 +31,7 @@ environment:
 **NOTE for Windows/OSX users:** The easiest way of getting Docker is by installing the
 [docker toolbox](https://www.docker.com/products/docker-toolbox).
 
-Or alternatively with our legacy vagrant environment:
-
-|               Prerequisite               |               Description                |
-|------------------------------------------|------------------------------------------|
-|[VirtualBox](https://www.virtualbox.org/) | Oracle VirtualBox Virtual Machine player |
-|[Vagrant](https://www.vagrantup.com/)      | Handy scriptable VM management           |
-|[Ansible](https://www.ansible.com/)    | Provisioning and deployment tool         |
-
-## Quick Start with Docker
+## Quick Start
 
 Getting started with GGRC-Core development should be fast and easy once you
 have Docker up and running. Here are the steps:
@@ -52,46 +44,24 @@ directory
 * run the following:
 
     ```
-    git submodule update --init
-    docker-compose --file docker-compose-clean.yml up -d
-    docker exec -it ggrccore_cleandev_1 su
-    make -B bower_components
-    build_css
-    build_assets
-    db_reset
+    ./bin/containers setup dev
     ```
+
+To log into the container, run the following:
+
+``` sh
+    docker exec -it ggrccore_cleandev_1 su
+```
 
 If you see download errors during the `docker-compose up -d` stage, or if any subsequent
 step fails, try running `docker-compose build` (See [Reprovisioning a Docker container](#reprovisioning-a-docker-container) below for more).
 
 If apt-get fails to install anything (for example `Could not resolve 'archive.ubuntu.com'`), try [this](#dns-issues).
 
-_NOTE: Because Docker shared volumes do not have permission mappings, you should run these commands as a user with UID 1000, to match the users inside the containers._
-
-## Quick Start with Vagrant (legacy)
-
-Alternative setup is using vagrant
-
-* clone the repo
-* cd to the project directory
-* make sure you use ansible version 1.9.X (if it's not in the repositories, you can
-install it via pip)
-* run the following:
-
-    ```sh
-    git submodule update --init
-    vagrant up
-    vagrant ssh
-    build_css
-    build_assets
-    db_reset
-    ```
-
-If you see download errors during the `vagrant up` stage, or if any subsequent
-step fails, try running `vagrant provision` (See [Provision a running Vagrant
-VM](#provision-a-running-vagrant-vm) below for more).
-
-Now you're in the VM and ready to rock. Get to work!
+_NOTE: Because Docker shared volumes do not have permission mappings, you should
+not use git and other file-creating commands from inside the container, as these
+files will be owned by root and may disrupt future git usage on the host
+machine._
 
 
 ### Launching GGRC as Stand-alone Flask
@@ -113,20 +83,18 @@ launching the application in the Google App Engine SDK environment is simple:
 launch_gae_ggrc
 ```
 
-This requires `src/app.yaml` and `src/packages.zip` with settings. You can generate the yaml file with:
+This requires `src/app.yaml` with settings and `src/packages` with
+requirements. You can generate the yaml file with:
 
 ```sh
 deploy_appengine extras/deploy_settings_local.sh
 ```
 
-And the packages.zip file with:
-
+To (re-)generate the requirements, you can run:
 
 ```
-make appengine_packages_zip
+make clean_appengine && make appengine
 ```
-
-
 
 ### Accessing the Application
 
@@ -135,6 +103,21 @@ The application will be accessible via this URL: <http://localhost:8080/>
 If you're running the Google App Engine SDK, the App Engine management console
 will be available via this URL: <http://localhost:8000/>. You can log in as
 user@example.com with admin rights and setup other users later.
+
+### Accessing MySQL query logs
+
+If using the `docker-compose-clean.yml` file, the myqsl query logs are enabled
+by default and can be monitored with:
+
+```
+docker exec ggrccore_db_1 tail -f /tmp/mysql.log
+```
+
+Or slow queries, that take more than 0.5s, with:
+
+```
+docker exec ggrccore_db_1 tail -f /tmp/slow_query.log
+```
 
 ## Running Tests
 
@@ -232,68 +215,6 @@ issued in the project directory:
 git submodule update --init
 ```
 
-### Ansible
-
-GGRC-Core provides both a `Vagrantfile` and an Ansible playbook to make
-standing up a development environment simple and repeatable thanks to the magic
-of Vagrant and Ansible. Vagrant enables developers to use a consistent and
-shared VM configuration to perform application testing while allowing
-developers to use the source code editing environment of their choice.
-
-### Vagrant
-
-The application is run in a virtual machine environment that can be repeatably,
-consistently, and reliably constructed thanks to Vagrant. In order to use
-Vagrant to create and manage the development virtual machine environment, it
-must first be created by issuing the following command from the project
-directory:
-
-```sh
-vagrant up
-```
-
-This results in the creation of the virtual machine and the provisioning of
-required software to support the development and execution of GGRC.
-
-#### Reprovisioning a Vagrant VM
-
-There are several ways to update the provisioning of a Vagrant VM when changes
-have been made to the cookbooks or other dependency management mechanisms in
-GGRC.
-
-##### Provision a running Vagrant VM
-
-To run provisioning on a running Vagrant VM, simply run the following in the
-project directory:
-
-```sh
-vagrant provision
-```
-
-##### Provisioning a halted Vagrant VM
-
-If you have halted your Vagrant VM via `vagrant halt`, simply `vagrant up`
-in the project directory to have provisioning run and update your development
-environment.
-
-##### Clean Slate Provisioning
-
-To create a clean slate environment in your Vagrant VM you can either reload or
-recreate the environment. To reload the environment issue the following command
-in the project directory:
-
-```sh
-vagrant reload
-```
-
-To completely recreate the environment issue the following command in the
-project directory:
-
-```sh
-vagrant destroy
-vagrant up
-```
-
 #### Reprovisioning a Docker container
 
 To reprovision a docker container run the following:
@@ -362,7 +283,8 @@ After sync'ing your local clone of GGRC-Core you may experience a failure when
 trying to run the application due to a change (usually an addition) to the
 prerequisites.
 
-There are three primary classes of requirements for GGRC-Core: Submodules, Python requirements and other provision steps
+There are three primary classes of requirements for GGRC-Core: Submodules, 
+Python requirements and other provision steps
 
 There are two pip requirements files: a runtime requirements file,
 `src/requirements.txt`, for application package dependencies and a
@@ -429,7 +351,7 @@ order they are specified. `source bin/init_env` will set this value to
 
 ### Details About VM File Structure
 
-`vagrant provision` installs several Debian packages globally within the
+`docker-compose build` installs several Debian packages globally within the
 VM. All other project data is contained within two directories, specified by
 environment variables (and defined in `/home/vagrant/.bashrc`).
 
@@ -452,22 +374,14 @@ run the following command from within the project directory in the host
 operating system:
 
 ```sh
-vagrant provision
-```
-
-or if you're using docker:
-
-```sh
 docker-compose build
 ```
 
-
-This will prompt vagrant to run the Ansible provisioner or docker to rebuild the containers. The result of this
 command *should* be an update Python virtualenv containing the Python packages
 required by the application as well as any new development package
 requirements.
 
-To Manually update the requirements, you can log in to vagrant or docker virtual machine and run
+To Manually update the requirements, you can log in to docker container and run
 
 ```sh
 pip install -r src/requirements-dev.txt
@@ -475,10 +389,10 @@ pip install --no-deps -r src/requirements.txt
 ```
 
 Note that if you're using `launch_gae_ggrc`, then changes to
-`src/requirements.txt` will require rebuilding the `src/packages.zip` via
+`src/requirements.txt` will require rebuilding the `src/packages` via
 
 ```
-make appengine_packages_zip
+make appengine_packages
 ```
 
 

@@ -6,26 +6,16 @@
 describe('GGRC.Components.assessmentTemplates', function () {
   'use strict';
 
-  var Component;  // the component under test
+  var viewModel;
 
   beforeAll(function () {
-    Component = GGRC.Components.get('assessmentTemplates');
+    viewModel = GGRC.Components.getViewModel('assessmentTemplates');
   });
 
   describe('_selectInitialTemplate() method', function () {
-    var mapper;
-    var method;  // the method under test
     var templates;
 
-    beforeAll(function () {
-      method = Component.prototype.scope._selectInitialTemplate;
-    });
-
     beforeEach(function () {
-      mapper = new can.Map({
-        assessmentTemplate: ''
-      });
-
       templates = [
         {
           title: 'No Template',
@@ -50,41 +40,33 @@ describe('GGRC.Components.assessmentTemplates', function () {
       ];
     });
 
-    it('gracefully handles a missing mapper object', function () {
-      try {
-        method(templates, null);
-      } catch (err) {
-        fail('Handling a non-existing mapper object failed: ' + err.msg);
-      }
-    });
-
     it('selects the first item from the first option group', function () {
-      mapper.attr('assessmentTemplate', 'template-123');
-      method(templates, mapper);
-      expect(mapper.assessmentTemplate).toEqual('foo');
+      viewModel.attr('assessmentTemplate', 'template-123');
+      viewModel._selectInitialTemplate(templates);
+      expect(viewModel.attr('assessmentTemplate')).toEqual('foo');
     });
 
     it('leaves the current template unchanged if only a dummy value in ' +
       'the templates list',
       function () {
-        mapper.attr('assessmentTemplate', 'template-123');
+        viewModel.attr('assessmentTemplate', 'template-123');
         templates.splice(1);  // keep only the 1st (dummy) option
 
-        method(templates, mapper);
+        viewModel._selectInitialTemplate(templates);
 
-        expect(mapper.assessmentTemplate).toEqual('template-123');
+        expect(viewModel.attr('assessmentTemplate')).toEqual('template-123');
       }
     );
 
     it('leaves the current template unchanged if first object group empty',
       function () {
-        mapper.attr('assessmentTemplate', 'template-123');
+        viewModel.attr('assessmentTemplate', 'template-123');
         templates[1].subitems.length = 0;
         spyOn(console, 'warn');  // just to silence it
 
-        method(templates, mapper);
+        viewModel._selectInitialTemplate(templates);
 
-        expect(mapper.assessmentTemplate).toEqual('template-123');
+        expect(viewModel.attr('assessmentTemplate')).toEqual('template-123');
       }
     );
 
@@ -97,19 +79,19 @@ describe('GGRC.Components.assessmentTemplates', function () {
       spyOn(console, 'warn');
       templates[1].subitems.length = 0;
 
-      method(templates, mapper);
+      viewModel._selectInitialTemplate(templates);
 
       expect(console.warn).toHaveBeenCalledWith(expectedMsg);
     });
 
     it('selects the first non-dummy value if it precedes all object groups',
       function () {
-        mapper.attr('assessmentTemplate', 'template-123');
+        viewModel.attr('assessmentTemplate', 'template-123');
         templates.splice(1, 0, {title: 'No Group Template', value: 'single'});
 
-        method(templates, mapper);
+        viewModel._selectInitialTemplate(templates);
 
-        expect(mapper.assessmentTemplate).toEqual('single');
+        expect(viewModel.attr('assessmentTemplate')).toEqual('single');
       }
     );
   });

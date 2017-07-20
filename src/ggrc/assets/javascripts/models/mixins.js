@@ -128,6 +128,14 @@
     }
   });
 
+  can.Model.Mixin('accessControlList', {
+    'after:init': function () {
+      if (!this.access_control_list) {
+        this.attr('access_control_list', []);
+      }
+    }
+  });
+
   can.Model.Mixin('ca_update', {}, {
     after_save: function () {
       this.attr('isReadyForRender', true);

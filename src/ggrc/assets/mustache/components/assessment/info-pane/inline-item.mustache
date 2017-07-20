@@ -1,0 +1,27 @@
+{{!
+    Copyright (C) 2017 Google Inc.
+    Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+}}
+
+<inline-edit-control
+  (inline-save)="saveInlineForm(%event)"
+  {is-edit-icon-denied}="isEditIconDenied"
+  {prop-name}="propName"
+  {dropdown-options}="dropdownOptions"
+  {dropdown-class}="dropdownClass"
+  {dropdown-no-value}="dropdownNoValue"
+  {is-loading}="isLoading"
+  {instance}="instance"
+  {value}="value"
+  {type}="type"
+  {with-read-more}="withReadMore">
+    <confirm-inline-control-title
+      (set-edit-mode-inline)="setEditModeInline(%event)"
+      (set-in-progress)="setInProgressState()"
+      {is-edit-icon-denied}="isEditIconDenied"
+      {instance}="instance"
+      {on-state-change-dfd}="onStateChangeDfd"
+      {edit-mode}="editMode">
+        <content></content>
+    </confirm-inline-control-title>
+</inline-edit-control>

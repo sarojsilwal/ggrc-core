@@ -35,7 +35,7 @@
     defaults: {
       status: 'Draft'
     },
-    statuses: ['Draft', 'Deprecated', 'Active'],
+    statuses: ['Draft', 'Deprecated', 'Active', 'Fixed', 'Fixed and Verified'],
     init: function () {
       if (this._super) {
         this._super.apply(this, arguments);

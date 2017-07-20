@@ -59,6 +59,26 @@ class TestImportIssues(TestCase):
         }
     })
 
+  def test_issue_state_import(self):
+    """Test import of issue state."""
+    audit = factories.AuditFactory()
+    statuses = ["Fixed", "Fixed and Verified"]
+    imported_data = []
+    for i in range(2):
+      imported_data.append(OrderedDict([
+          ("object_type", "Issue"),
+          ("Code*", ""),
+          ("Title*", "Test issue {}".format(i)),
+          ("Admin*", "user@example.com"),
+          ("audit", audit.slug),
+          ("State", statuses[i]),
+      ]))
+
+    response = self.import_data(*imported_data)
+    self._check_csv_response(response, {})
+    db_statuses = [i.status for i in models.Issue.query.all()]
+    self.assertEqual(statuses, db_statuses)
+
   def test_import_with_mandatory(self):
     """Test import of data with mandatory role"""
     # Import of data should be allowed if mandatory role provided

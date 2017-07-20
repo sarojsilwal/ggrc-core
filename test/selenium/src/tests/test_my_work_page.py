@@ -33,14 +33,18 @@ class TestMyWorkPage(base.Test):
       controls_tab.wait_member_deleted(counter)
     controls_generic_widget = generic_widget.Controls(
         selenium, objects.CONTROLS)
-    assert controls_generic_widget.members_listed == []
+    expected_widget_members = []
+    actual_widget_members = controls_generic_widget.members_listed
+    assert expected_widget_members == actual_widget_members
 
   @pytest.mark.smoke_tests
   def test_redirect(self, header_dashboard, selenium):
     """Tests if user is redirected to My Work page after clicking on
     the my work button in user dropdown."""
     header_dashboard.select_my_work()
-    assert selenium.current_url == dashboard.Dashboard.URL
+    expected_url = dashboard.Dashboard.URL
+    actual_url = selenium.current_url
+    assert expected_url == actual_url
 
   @pytest.mark.smoke_tests
   def test_lhn_stays_expanded(self, header_dashboard, selenium):
@@ -50,7 +54,9 @@ class TestMyWorkPage(base.Test):
     selenium_utils.wait_until_stops_moving(lhn_menu.my_objects.element)
     selenium_utils.hover_over_element(
         selenium, dashboard.Header(selenium).button_my_tasks.element)
-    assert initial_position == lhn.Menu(selenium).my_objects.element.location
+    expected_el_position = initial_position
+    actual_el_position = lhn.Menu(selenium).my_objects.element.location
+    assert expected_el_position == actual_el_position
 
   @pytest.mark.smoke_tests
   def test_lhn_remembers_tab_state(self, header_dashboard, selenium):

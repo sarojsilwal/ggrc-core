@@ -8,52 +8,46 @@ describe('GGRC.Components.objectGenerator', function () {
 
   var Component;
   var events;
-  var scope;
+  var viewModel;
   var handler;
 
   beforeAll(function () {
     Component = GGRC.Components.get('objectGenerator');
     events = Component.prototype.events;
   });
-  beforeEach(function () {
-    scope = GGRC.Components.getViewModel('objectGenerator');
-  });
 
-  describe('scope() method', function () {
-    var el;
-    var parentScope;
-
+  describe('viewModel() method', function () {
+    var parentViewModel;
     beforeEach(function () {
-      el = new can.Map();
-      parentScope = new can.Map();
+      parentViewModel = new can.Map();
     });
     it('returns object with function "isLoadingOrSaving"', function () {
-      var result = Component.prototype.scope({}, parentScope, el);
+      var result = new Component.prototype.viewModel({}, parentViewModel)();
       expect(result.isLoadingOrSaving).toEqual(jasmine.any(Function));
     });
 
     describe('isLoadingOrSaving() method', function () {
       beforeEach(function () {
-        scope = new can.Map(Component.prototype.scope({}, parentScope, el));
+        viewModel = new Component.prototype.viewModel({}, parentViewModel)();
       });
       it('returns true if it is saving', function () {
-        scope.attr('mapper.is_saving', true);
-        expect(scope.isLoadingOrSaving()).toEqual(true);
+        viewModel.attr('is_saving', true);
+        expect(viewModel.isLoadingOrSaving()).toEqual(true);
       });
       it('returns true if type change is blocked', function () {
-        scope.attr('mapper.block_type_change', true);
-        expect(scope.isLoadingOrSaving()).toEqual(true);
+        viewModel.attr('block_type_change', true);
+        expect(viewModel.isLoadingOrSaving()).toEqual(true);
       });
-      it('returns true if mapper is loading', function () {
-        scope.attr('mapper.is_loading', true);
-        expect(scope.isLoadingOrSaving()).toEqual(true);
+      it('returns true if it is loading', function () {
+        viewModel.attr('is_loading', true);
+        expect(viewModel.isLoadingOrSaving()).toEqual(true);
       });
       it('returns false if page is not loading, it is not saving,' +
-      ' type change is not blocked and mapper is not loading', function () {
-        scope.attr('mapper.is_saving', false);
-        scope.attr('mapper.block_type_change', false);
-        scope.attr('mapper.is_loading', false);
-        expect(scope.isLoadingOrSaving()).toEqual(false);
+      ' type change is not blocked and it is not loading', function () {
+        viewModel.attr('is_saving', false);
+        viewModel.attr('block_type_change', false);
+        viewModel.attr('is_loading', false);
+        expect(viewModel.isLoadingOrSaving()).toEqual(false);
       });
     });
   });
@@ -62,26 +56,26 @@ describe('GGRC.Components.objectGenerator', function () {
     var that;
 
     beforeEach(function () {
-      scope.attr('mapper', {
+      viewModel.attr({
         selected: [1, 2, 3],
         entries: [3, 2, 1],
         afterShown: function () {}
       });
       that = {
-        scope: scope,
+        viewModel: viewModel,
         setModel: jasmine.createSpy('setModel')
       };
       handler = events.inserted;
     });
 
-    it('sets empty array to mapper.selected', function () {
+    it('sets empty array to selected', function () {
       handler.call(that);
-      expect(scope.attr('mapper.selected').length)
+      expect(viewModel.attr('selected').length)
         .toEqual(0);
     });
-    it('sets empty array to mapper.entries', function () {
+    it('sets empty array to entries', function () {
       handler.call(that);
-      expect(scope.attr('mapper.entries').length)
+      expect(viewModel.attr('entries').length)
         .toEqual(0);
     });
     it('calls setModel()', function () {
@@ -95,7 +89,7 @@ describe('GGRC.Components.objectGenerator', function () {
     var spyObj;
 
     beforeEach(function () {
-      scope.attr('mapper', {});
+      viewModel.attr({});
       spyObj = {
         trigger: function () {}
       };
@@ -108,18 +102,18 @@ describe('GGRC.Components.objectGenerator', function () {
       handler = events.closeModal;
     });
 
-    it('sets false to mapper.is_saving', function () {
-      scope.attr('mapper.is_saving', true);
+    it('sets false to is_saving', function () {
+      viewModel.attr('is_saving', true);
       handler.call({
         element: element,
-        scope: scope
+        viewModel: viewModel
       });
-      expect(scope.attr('mapper.is_saving')).toEqual(false);
+      expect(viewModel.attr('is_saving')).toEqual(false);
     });
     it('dismiss the modal', function () {
       handler.call({
         element: element,
-        scope: scope
+        viewModel: viewModel
       });
       expect(spyObj.trigger).toHaveBeenCalledWith('click');
     });
@@ -133,7 +127,7 @@ describe('GGRC.Components.objectGenerator', function () {
 
     beforeEach(function () {
       callback = jasmine.createSpy().and.returnValue('expectedResult');
-      scope.attr('mapper', {
+      viewModel.attr({
         callback: callback,
         type: 'type',
         object: 'Program',
@@ -149,7 +143,7 @@ describe('GGRC.Components.objectGenerator', function () {
       element = $('<div></div>');
       handler = events['.modal-footer .btn-map click'];
       that = {
-        scope: scope,
+        viewModel: viewModel,
         closeModal: jasmine.createSpy()
       };
       spyOn(window, 'RefreshQueue')
@@ -171,12 +165,10 @@ describe('GGRC.Components.objectGenerator', function () {
       expect(result).toEqual(undefined);
     });
 
-    it('sets true to mapper.is_saving and' +
-      'returns callback if it is assessment generation', function () {
+    it('sets true to is_saving and returns callback', function () {
       var result;
-      scope.attr('mapper.assessmentGenerator', true);
       result = handler.call(that, element, event);
-      expect(scope.attr('mapper.is_saving')).toEqual(true);
+      expect(viewModel.attr('is_saving')).toEqual(true);
       expect(result).toEqual('expectedResult');
       expect(callback.calls.argsFor(0)[0].length)
         .toEqual(0);
@@ -192,41 +184,40 @@ describe('GGRC.Components.objectGenerator', function () {
 
   describe('"setModel" handler', function () {
     beforeEach(function () {
-      scope.attr('mapper', {
+      viewModel.attr({
         modelFromType: function () {}
       });
-      spyOn(scope.mapper, 'modelFromType')
+      spyOn(viewModel, 'modelFromType')
         .and.returnValue('mockModel');
       handler = events.setModel;
     });
-    it('sets model to mapper.model', function () {
-      handler.call({scope: scope});
-      expect(scope.attr('mapper.model')).toEqual('mockModel');
+    it('sets model to model', function () {
+      handler.call({viewModel: viewModel});
+      expect(viewModel.attr('model')).toEqual('mockModel');
     });
   });
 
-  describe('"{mapper} type" handler', function () {
+  describe('"{viewModel} type" handler', function () {
     var that;
     beforeEach(function () {
-      scope.attr('mapper', {
-        assessmentGenerator: true,
+      viewModel.attr({
         relevant: [1, 2, 3],
         onSubmit: function () {}
       });
       that = {
-        scope: scope,
+        viewModel: viewModel,
         setModel: jasmine.createSpy()
       };
-      handler = events['{mapper} type'];
+      handler = events['{viewModel} type'];
     });
 
-    it('sets empty string to mapper.filter', function () {
+    it('sets empty string to filter', function () {
       handler.call(that);
-      expect(scope.attr('mapper.filter')).toEqual('');
+      expect(viewModel.attr('filter')).toEqual('');
     });
-    it('sets false to mapper.afterSearch', function () {
+    it('sets false to afterSearch', function () {
       handler.call(that);
-      expect(scope.attr('mapper.afterSearch')).toEqual(false);
+      expect(viewModel.attr('afterSearch')).toEqual(false);
     });
     it('calls setModel()', function () {
       handler.call(that);
@@ -234,30 +225,28 @@ describe('GGRC.Components.objectGenerator', function () {
     });
   });
 
-  describe('"{mapper} assessmentTemplate" handler', function () {
+  describe('"{viewModel} assessmentTemplate" handler', function () {
     beforeEach(function () {
-      scope.attr('mapper', {
-
-      });
-      handler = events['{mapper} assessmentTemplate'];
+      viewModel.attr({});
+      handler = events['{viewModel} assessmentTemplate'];
     });
 
-    it('sets false to mapper.block_type_change if value is empty',
+    it('sets false to block_type_change if value is empty',
       function () {
-        handler.call({scope: scope});
-        expect(scope.attr('mapper.block_type_change'))
+        handler.call({viewModel: viewModel});
+        expect(viewModel.attr('block_type_change'))
           .toEqual(false);
       });
-    it('sets true to mapper.block_type_change if value is not empty',
+    it('sets true to block_type_change if value is not empty',
       function () {
-        handler.call({scope: scope}, scope, {}, 'mock-value');
-        expect(scope.attr('mapper.block_type_change'))
+        handler.call({viewModel: viewModel}, viewModel, {}, 'mock-value');
+        expect(viewModel.attr('block_type_change'))
           .toEqual(true);
       });
-    it('sets type to mapper.type if value is not empty',
+    it('sets type to type if value is not empty',
       function () {
-        handler.call({scope: scope}, scope, {}, 'mock-value');
-        expect(scope.attr('mapper.type'))
+        handler.call({viewModel: viewModel}, viewModel, {}, 'mock-value');
+        expect(viewModel.attr('type'))
           .toEqual('value');
       });
   });

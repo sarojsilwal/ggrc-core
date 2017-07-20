@@ -22,7 +22,7 @@ can.Model.Cacheable("CMS.Models.Directive", {
       {attr_title: 'URL', attr_name: 'url'},
       {attr_title: 'Reference URL', attr_name: 'reference_url'},
       {attr_title: 'Effective Date', attr_name: 'start_date'},
-      {attr_title: 'Stop Date', attr_name: 'end_date'}
+      {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
     ])
     , add_item_view : GGRC.mustache_path + "/snapshots/tree_add_item.mustache"
     }
@@ -172,7 +172,7 @@ CMS.Models.Directive("CMS.Models.Policy", {
         attr_sort_field: 'kind'
       },
       {attr_title: 'Effective Date', attr_name: 'start_date'},
-      {attr_title: 'Stop Date', attr_name: 'end_date'},
+      {attr_title: 'Last Deprecated Date', attr_name: 'end_date'},
       {attr_title: 'Policy URL', attr_name: 'url'},
       {attr_title: 'Reference URL', attr_name: 'reference_url'}
     ]);

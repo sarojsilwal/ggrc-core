@@ -51,25 +51,34 @@ class TestUtil(InstanceRepresentation):
 
 
 class Element(InstanceRepresentation):
-  """Element class represents primitives in models. Initializing by web driver
-  and locator (CSS selector (tuple) or webelement element (instance
-  of webdriver.Chrome).
+  """Element class represents primitives in models. Initializing by 'driver'
+  Web driver and 'locator_or_element' (CSS selector (tuple) or Web element
+  (instance of webelement.WebElement).
   """
 
-  def __init__(self, driver, locator):
+  def __init__(self, driver, locator_or_element):
     super(Element, self).__init__()
     self._driver = driver
-    self._locator = locator
-    self.element = (
-        locator if isinstance(locator, webelement.WebElement)
-        else self.get_element())
+    self.locator_or_element = locator_or_element
+    self.element = self.get_element()
     self.text = self.element.text
 
-  def get_element(self):
-    """
+  def _get_visible_element(self):
+    """Get element: if self object 'locator_or_element' is already Web element
+    then try wait until it will be visible else try to find visible Web element
+    using selenium utils method 'get_when_visible'.
     Return: selenium.webdriver.remote.webelement.WebElement
     """
-    return selenium_utils.get_when_visible(self._driver, self._locator)
+    if isinstance(self.locator_or_element, webelement.WebElement):
+      selenium_utils.wait_until_condition(
+          self._driver, lambda x: self.locator_or_element.is_displayed())
+      return self.locator_or_element
+    return selenium_utils.get_when_visible(
+        self._driver, self.locator_or_element)
+
+  def get_element(self):
+    """Get element if it is displayed."""
+    return self._get_visible_element()
 
   def click(self):
     """Click on element."""
@@ -79,10 +88,6 @@ class Element(InstanceRepresentation):
     """Click on element using JS."""
     selenium_utils.click_via_js(self._driver, self.element)
 
-  def click_when_visible(self):
-    """Wait for element to be visible and only then performs click."""
-    selenium_utils.get_when_visible(self._driver, self._locator).click()
-
 
 class Label(Element):
   """Generic label."""
@@ -90,18 +95,9 @@ class Label(Element):
 
 class RichTextInputField(Element):
   """Common class for representation of Rich Text input."""
-  def __init__(self, driver, locator):
-    """
-    Args: driver (CustomDriver):
-    """
-    super(RichTextInputField, self).__init__(driver, locator)
-    self._driver = driver
-    self._locator = locator
-    self.text = self.element.text
 
   def enter_text(self, text):
-    """Clear fields and enteres text."""
-    self.click_when_visible()
+    """Clear text from element and enter new text."""
     self.element.clear()
     self.element.send_keys(text)
     self.text = text
@@ -117,7 +113,7 @@ class RichTextInputField(Element):
     self.element.clear()
     self.element.send_keys(keys.Keys.CONTROL, 'v')
     element.click()
-    element = self._driver.find_element(*self._locator)
+    element = self._driver.find_element(*self.locator_or_element)
     self.text = element.get_attribute("value")
 
 
@@ -141,7 +137,7 @@ class TextFilterDropdown(Element):
     self.text_to_filter = text
     self.element.click()
     self.element.clear()
-    self._driver.find_element(*self._locator).send_keys(text)
+    self._driver.find_element(*self.locator_or_element).send_keys(text)
 
   def _select_first_result(self):
     """Wait when dropdown elements appear and select first one."""
@@ -173,8 +169,7 @@ class Iframe(Element):
     """
     Args: text (basestring): string want to enter
     """
-    iframe = selenium_utils.get_when_visible(self._driver, self._locator)
-    self._driver.switch_to.frame(iframe)
+    self._driver.switch_to.frame(self.element)
     element = self._driver.find_element_by_tag_name("body")
     element.clear()
     element.send_keys(text)
@@ -236,38 +231,23 @@ class DatePicker(Element):
 class Button(Element):
   """Generic button element."""
 
-  def get_element(self):
-    return selenium_utils.get_when_clickable(self._driver, self._locator)
-
 
 class Checkbox(Element):
   """Generic checkbox element."""
 
-  def __init__(self, driver, locator):
-    super(Checkbox, self).__init__(driver, locator)
-    self.is_checked = self.element.is_selected()
-
-  def get_element(self):
-    """Get checkbox when web element clickable."""
-    return selenium_utils.get_when_clickable(self._driver, self._locator)
-
   def check(self):
     """Select checkbox."""
-    if not self.is_checked:
+    if not self.element.is_checked():
       self.element.click()
 
   def uncheck(self):
     """Unselect checkbox."""
-    if self.is_checked:
+    if self.element.is_checked():
       self.element.click()
 
-  def is_element_checked(self):
-    """Check DOM input element checked property using JS.
-    Args: driver (base.CustomDriver), locator (tuple)
-    Return: True if element is checked, False if element is not checked.
-    """
-    return self._driver.execute_script("return arguments[0].checked",
-                                       self.element)
+  def is_checked_via_js(self):
+    """Check if checkbox is checked using JS."""
+    return selenium_utils.is_element_checked(self._driver, self.element)
 
 
 class Toggle(Element):
@@ -276,13 +256,10 @@ class Toggle(Element):
  which may not work on an arbitrary element.
  """
 
-  def __init__(self, driver, locator, is_active_attr_val="active"):
-    super(Toggle, self).__init__(driver, locator)
+  def __init__(self, driver, locator_or_element, is_active_attr_val="active"):
+    super(Toggle, self).__init__(driver, locator_or_element)
     self.is_activated = selenium_utils.is_value_in_attr(
         self.element, value=is_active_attr_val)
-
-  def get_element(self):
-    return selenium_utils.get_when_clickable(self._driver, self._locator)
 
   def toggle(self, on_el=True):
     """Click on element based on is_active status and "on" arg.
@@ -298,17 +275,14 @@ class Toggle(Element):
 
 class Tab(Element):
   """Generic element representing tab."""
-  def __init__(self, driver, locator, is_activated=True):
-    super(Tab, self).__init__(driver, locator)
+  def __init__(self, driver, locator_or_element, is_activated=True):
+    super(Tab, self).__init__(driver, locator_or_element)
     self.is_activated = is_activated
-
-  def get_element(self):
-    return selenium_utils.get_when_clickable(self._driver, self._locator)
 
   def click(self):
     """When clicking on tab to first make sure it's clickable i.e.
     that this element will receive click."""
-    selenium_utils.get_when_clickable(self._driver, self._locator).click()
+    self.element.click()
     self.is_activated = True
 
 
@@ -327,9 +301,6 @@ class DropdownStatic(Element):
     self._locator_dropdown_elements = elements_locator
     self.elements_dropdown = self._driver.find_elements(
         *self._locator_dropdown_elements)
-
-  def click(self):
-    self.element.click()
 
   def select(self, member_name):
     """Selects dropdown element based on dropdown element name."""
@@ -521,8 +492,7 @@ class TreeView(Component):
 
   def __init__(self, driver, obj_name=None):
     super(TreeView, self).__init__(driver)
-    self._tree_view_header_elements = []
-    self._tree_view_items_elements = []
+    self._tree_view_headers = []
     self._tree_view_items = []
     self.locator_set_visible_fields = None
     self.locator_no_results_message = self._locators.NO_RESULTS_MESSAGE
@@ -541,14 +511,14 @@ class TreeView(Component):
     selenium_utils.get_when_invisible(self._driver, self._locators.SPINNER)
     selenium_utils.wait_for_js_to_load(self._driver)
 
-  def get_tree_view_header_elements(self):
-    """Get Tree View header as list of elements from current widget."""
+  def _init_tree_view_headers(self):
+    """Init Tree View headers as list of elements from current widget."""
     _locator_header = (By.CSS_SELECTOR, self._locators.HEADER)
-    self._tree_view_header_elements = selenium_utils.get_when_all_visible(
+    self._tree_view_headers = selenium_utils.get_when_all_visible(
         self._driver, _locator_header)
 
-  def get_tree_view_items_elements(self):
-    """Get Tree View items as list of elements from current widget.
+  def _init_tree_view_items(self):
+    """Init Tree View items as list of TreeViewItem from current widget.
     If no items in tree view return empty list.
     """
     _locator_items = (
@@ -556,41 +526,26 @@ class TreeView(Component):
     self.wait_loading_after_actions()
     has_no_record_found = selenium_utils.is_element_exist(
         self._driver, self.locator_no_results_message)
-    self._tree_view_items_elements = (
-        [] if has_no_record_found else
-        selenium_utils.get_when_all_visible(self._driver, _locator_items))
-    return self._tree_view_items_elements
+    self._tree_view_items = (
+        [] if has_no_record_found else [
+            TreeViewItem(
+                driver=self._driver, locator_or_element=element,
+                item_btn_locator=(
+                    By.CSS_SELECTOR, self._locators.ITEM_EXPAND_BUTTON))
+            for element in selenium_utils.get_when_all_visible(
+                self._driver, _locator_items)])
+    return self._tree_view_items
 
-  def set_tree_view_items(self):
-    """Set Tree View items as list of Tree View item objects from current
-    widget.
-    """
-    self.get_tree_view_items_elements()
-    self._tree_view_items = [
-        TreeViewItem(
-            driver=self._driver, text=el.text,
-            item_btn=el.find_element(
-                By.CSS_SELECTOR, self._locators.ITEM_EXPAND_BUTTON)) for el in
-        self._tree_view_items_elements]
-
-  def tree_view_header_elements(self):
+  def tree_view_headers(self):
     """Return Tree View header as list of elements from current widget."""
-    if not self._tree_view_header_elements:
-      self.get_tree_view_header_elements()
-    return self._tree_view_header_elements
-
-  def tree_view_items_elements(self):
-    """Return Tree View items as list of elements from current widget."""
-    if not self._tree_view_items_elements:
-      self.get_tree_view_items_elements()
-    return self._tree_view_items_elements
+    if not self._tree_view_headers:
+      self._init_tree_view_headers()
+    return self._tree_view_headers
 
   def tree_view_items(self):
-    """Return Tree View items as list of Tree View item objects from
-    current widget.
-    """
+    """Return Tree View items as list of TreeViewItem from current widget."""
     if not self._tree_view_items:
-      self.set_tree_view_items()
+      self._init_tree_view_items()
     return self._tree_view_items
 
   def open_set_visible_fields(self):
@@ -606,15 +561,15 @@ class TreeView(Component):
     """Get list of scopes (dicts) from members (text scopes) which displayed on
     Tree View according to current set of visible fields.
     """
-    list_scopes = self._tree_view_items_elements
-    if self.get_tree_view_items_elements():
+    list_scopes = self._tree_view_items
+    if self._init_tree_view_items():
       list_headers = [_item.text.splitlines()[:len(self.fields_to_set)] for
-                      _item in self.tree_view_header_elements()]
+                      _item in self.tree_view_headers()]
       # u'Ex' to u'Ex', u'Ex1, Ex2' to [u'Ex1', u'Ex2']
       list_lists_items = [
           [_.split(", ") if len(_.split(", ")) >= 2 else _ for
-           _ in _item.text.splitlines()[:len(self.fields_to_set)]] for
-          _item in self.tree_view_items_elements()]
+           _ in _item.cell_values[:len(self.fields_to_set)]] for
+          _item in self.tree_view_items()]
       list_scopes = [
           dict(zip(list_headers[0], item)) for item in list_lists_items]
     return list_scopes
@@ -698,12 +653,16 @@ class MapperSetVisibleFieldsModal(SetVisibleFieldsModal):
   _locators = constants.locator.ModalSetVisibleFieldsMapper
 
 
-class TreeViewItem(Component):
+class TreeViewItem(Element):
   """Class for describing single item on Tree View."""
-  def __init__(self, driver, text=None, item_btn=None):
-    super(TreeViewItem, self).__init__(driver)
-    self.text = text
-    self.item_btn = item_btn
+  _locators = constants.locator.TreeViewItem
+
+  def __init__(self, driver, locator_or_element, item_btn_locator=None):
+    super(TreeViewItem, self).__init__(driver, locator_or_element)
+    self.item_btn = (
+        None if item_btn_locator is None else
+        selenium_utils.get_element_by_element_safe(
+            self.element, item_btn_locator))
 
   def expand(self):
     """Expand Tree View item if it is not expanded already."""
@@ -722,6 +681,83 @@ class TreeViewItem(Component):
   @property
   def is_expanded(self):
     return selenium_utils.is_value_in_attr(self.item_btn)
+
+  @property
+  def cell_values(self):
+    """Return list of text from each cell"""
+    return [cell.text for
+            cell in selenium_utils.get_when_all_visible(
+                self.element, self._locators.CELL)]
+
+
+class CommentsPanel(Element):
+  """Representing comments panel witch contains input part and items."""
+  _locators = constants.locator.CommentsPanel
+
+  def __init__(self, driver, locator_or_element):
+    super(CommentsPanel, self).__init__(driver, locator_or_element)
+    self._items = []
+    self.header_lbl = Label(
+        self.element, self._locators.HEADER_LBL_CSS)
+    self.input_txt = RichTextInputField(
+        self.element, self._locators.INPUT_TXT_CSS)
+    self.add_btn = Button(self.element, self._locators.ADD_BTN_CSS)
+    self.send_cb = Checkbox(self.element, self._locators.CB_SEND_CSS)
+
+  @property
+  def scopes(self):
+    """Return list of text comments in dictionary format where each of them
+    contains items:
+    {'modified_by': person, 'created_at': datetime, 'description': text}.
+    """
+    self._items = [
+        CommentItem(self._driver, element) for element in
+        self.element.find_elements(*self._locators.ITEMS_CSS)]
+    return [
+        {"modified_by": item.author.text, "created_at": item.datetime.text,
+         "description": item.content.text} for item in self._items]
+
+  @property
+  def count(self):
+    """Return count of text comments on comments panel."""
+    return len(self.scopes)
+
+  @property
+  def is_input_empty(self):
+    """Return 'True' if comments input field is empty, else 'False'."""
+    return not self.element.find_element(
+        *self.input_txt.locator_or_element).text
+
+  def add_comments(self, *comments):
+    """Add text comments to input field."""
+    for comment in comments:
+      self.input_txt.enter_text(comment)
+      self.add_btn.click()
+      selenium_utils.get_when_invisible(
+          self._driver, self._locators.CB_SPINNER_CSS)
+    return self
+
+
+class CommentItem(Element):
+  """Representing single comment item in comments' panel."""
+  _locators = constants.locator.CommentItem
+
+  @property
+  def author(self):
+    """Return author element of comment from comments item."""
+    return Element(self.element, self._locators.AUTHOR_CSS)
+
+  @property
+  def datetime(self):
+    """Return datetime element of comment from comments item when comments
+    was added.
+    """
+    return Label(self.element, self._locators.DATETIME_CSS)
+
+  @property
+  def content(self):
+    """Return content element of comment from comments item."""
+    return Label(self.element, self._locators.CONTENT_CSS)
 
 
 class ListCheckboxes(Component):
@@ -827,8 +863,8 @@ class DropdownMenuItem(Element):
   _locators = constants.locator.CommonDropdownMenu
   _elements = constants.element.DropdownMenuItemTypes
 
-  def __init__(self, driver, locator):
-    super(DropdownMenuItem, self).__init__(driver, locator)
+  def __init__(self, driver, locator_or_element):
+    super(DropdownMenuItem, self).__init__(driver, locator_or_element)
     self._enabled = None
     self._item_type = ""
 

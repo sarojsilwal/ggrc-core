@@ -5,7 +5,7 @@
 
 describe('Model states test', function () {
   var basicStateObjects = ['AccessGroup', 'Clause', 'Contract',
-      'Control', 'DataAsset', 'Facility', 'Issue', 'Market',
+      'Control', 'DataAsset', 'Facility', 'Market',
       'Objective', 'OrgGroup', 'Policy', 'Process', 'Product', 'Program',
       'Project', 'Regulation', 'Risk', 'Section', 'Standard', 'System',
       'Threat', 'Vendor'];
@@ -26,6 +26,11 @@ describe('Model states test', function () {
     var expectedStatuses = ['Not Started', 'In Progress', 'Ready for Review',
         'Verified', 'Completed'];
     expect(CMS.Models.Assessment.statuses).toEqual(expectedStatuses);
+  });
+  it('checks if Issue has correct statuses', function () {
+    var expectedStatuses = ['Draft', 'Deprecated', 'Active', 'Fixed',
+        'Fixed and Verified'];
+    expect(CMS.Models.Issue.statuses).toEqual(expectedStatuses);
   });
 });
 

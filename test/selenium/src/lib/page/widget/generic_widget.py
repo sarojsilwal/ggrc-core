@@ -182,7 +182,7 @@ class TreeView(base.TreeView):
   def _get_item_num_by_title(self, title):
     """Return number of item by title"""
     list_items = [item.text.splitlines() for item in
-                  self.tree_view_items_elements()]
+                  self.tree_view_items()]
     item_num = next(num for num, item in enumerate(list_items)
                     if title in item)
     return item_num
@@ -195,7 +195,7 @@ class TreeView(base.TreeView):
     button_num = self._get_item_num_by_title(title)
     item_dropdown_button = self.tree_view_items()[button_num].item_btn
     selenium_utils.hover_over_element(
-        self._driver, self.tree_view_items_elements()[button_num])
+        self._driver, self.tree_view_items()[button_num].element)
     selenium_utils.hover_over_element(
         self._driver, item_dropdown_button)
     item_dropdown_button.click()

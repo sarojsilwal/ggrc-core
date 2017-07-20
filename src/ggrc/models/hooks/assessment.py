@@ -82,12 +82,12 @@ def init_hook():
       if not src.get("_generated") and not snapshot:
         continue
       template = template_cache.get(src.get("template", {}).get("id"))
-      audit = audit_cache.get(src.get("audit", {}).get("id"))
+      audit = audit_cache[src["audit"]["id"]]
       relate_assignees(assessment, snapshot, template, audit)
       relate_ca(assessment, template)
       assessment.title = u'{} assessment for {}'.format(
           snapshot.revision.content['title'],
-          snapshot.parent.title,
+          audit.title,
       )
       if not template:
         continue
@@ -95,6 +95,8 @@ def init_hook():
         assessment.test_plan = snapshot.revision.content['test_plan']
       else:
         assessment.test_plan = template.procedure_description
+      if template.template_object_type:
+        assessment.assessment_type = template.template_object_type
 
   @signals.Restful.model_put.connect_via(Assessment)
   @signals.Restful.model_put.connect_via(Issue)

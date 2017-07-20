@@ -13,10 +13,10 @@
       {
         models: [
           'AccessGroup', 'Clause', 'Contract',
-          'Control', 'DataAsset', 'Facility', 'Issue', 'Market',
+          'Control', 'DataAsset', 'Facility', 'Market',
           'Objective', 'OrgGroup', 'Policy', 'Process', 'Product', 'Program',
           'Project', 'Regulation', 'Risk', 'Section', 'Standard', 'System',
-          'Threat', 'Vendor', 'Issue'
+          'Threat', 'Vendor'
         ],
         states: ['Active', 'Draft', 'Deprecated']
       },
@@ -41,6 +41,12 @@
           'TaskGroup', 'Cycle'
         ],
         states: []
+      },
+      {
+        models: ['Issue'],
+        states: [
+          'Active', 'Draft', 'Deprecated', 'Fixed', 'Fixed and Verified'
+        ]
       }
     ];
 

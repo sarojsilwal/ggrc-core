@@ -38,4 +38,5 @@ class TestProgramPage(base.Test):
     actual_controls = (webui_service.ControlsService(selenium).
                        get_list_objs_from_tree_view(src_obj=new_program_rest))
     assert sorted(expected_controls) == sorted(actual_controls), (
-        messages.ERR_MSG_FORMAT.format(expected_controls, actual_controls))
+        messages.AssertionMessages.
+        format_err_msg_equal(expected_controls, actual_controls))

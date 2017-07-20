@@ -5,6 +5,7 @@
 # pylint: disable=invalid-name
 
 from collections import namedtuple
+
 from lib.constants import objects, roles
 
 
@@ -225,12 +226,12 @@ class CommonAssessment(Common):
   """Common elements' labels and properties for Assessments objects."""
   ASMT = objects.get_normal_form(objects.get_singular(objects.ASSESSMENTS))
   STATE = Base.STATE
+  CREATORS = "Creators"
   CREATORS_ = "Creator(s)"
-  CREATORS = TransformationSetVisibleFields.CREATORS
+  ASSIGNEES = "Assignees"
   ASSIGNEES_ = "Assignee(s)"
-  ASSIGNEES = TransformationSetVisibleFields.ASSIGNEES
+  VERIFIERS = "Verifiers"
   VERIFIERS_ = "Verifier(s)"
-  VERIFIERS = TransformationSetVisibleFields.ASSIGNEES
   MAPPED_OBJECTS = TransformationSetVisibleFields.MAPPED_OBJECTS
   VERIFIED = TransformationSetVisibleFields.VERIFIED
 
@@ -276,6 +277,8 @@ class AssessmentStates(BaseStates):
 
 class IssueStates(ObjectStates):
   """States for Issues objects."""
+  FIXED = "Fixed"
+  FIXED_AND_VERIFIED = "Fixed and Verified"
 
 
 class ProgramInfoWidget(CommonProgram):
@@ -303,6 +306,7 @@ class AssessmentInfoWidget(CommonAssessment):
   WIDGET_HEADER = Base.WIDGET_INFO_HEADER_FORMAT.format(CommonAssessment.ASMT)
   TITLE_UPPER = CommonAssessment.TITLE.upper()
   CODE_UPPER = CommonAssessment.CODE.upper()
+  COMMENTS_HEADER = "RESPONSES/COMMENTS"
 
 
 class AssessmentTemplateModalSetVisibleFields(CommonModalSetVisibleFields):
@@ -437,3 +441,9 @@ class DropdownMenuItemTypes(object):
   UNMAP = "ban"
   CLONE = "clone"
   UPDATE = "refresh"
+
+
+class TransformationElements(TransformationSetVisibleFields, CommonAssessment):
+  """All transformation elements' labels and properties witch are using to
+  convert UI attributes to entities attributes.
+  """

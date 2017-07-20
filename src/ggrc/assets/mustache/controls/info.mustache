@@ -129,7 +129,7 @@
               {{/if}}
             </div>
             <div class="span4">
-              <h6>Stop Date</h6>
+              <h6>Last Deprecated Date</h6>
               {{#if end_date}}
                 <p>
                   {{localize_date end_date}}
@@ -154,31 +154,51 @@
           <div class="row-fluid wrap-row">
             <div class="span8">
               <h6>Assertions</h6>
-              {{#using items=assertions}}
               {{#if assertions}}
-                <ul>
-                  {{#items}}
-                    <li>{{name}}</li>
-                  {{/items}}
-                </ul>
+                {{#if_helpers '\
+                 #if' instance.snapshot '\
+                 or #if' instance.isRevision}}
+                  <ul>
+                    {{#assertions}}
+                      <li>{{display_name}}</li>
+                    {{/assertions}}
+                  </ul>
+                {{else}}
+                  {{#using items=assertions}}
+                    <ul>
+                      {{#items}}
+                        <li>{{display_name}}</li>
+                      {{/items}}
+                    </ul>
+                  {{/using}}
+                {{/if_helpers}}
               {{else}}
                 <span class="empty-message">None</span>
               {{/if}}
-              {{/using}}
             </div>
             <div class="span4">
               <h6>Categories</h6>
-              {{#using items=categories}}
               {{#if categories}}
-                <ul>
-                  {{#items}}
-                    <li>{{name}}</li>
-                  {{/items}}
-                </ul>
+                {{#if_helpers '\
+                 #if' instance.snapshot '\
+                 or #if' instance.isRevision}}
+                  <ul>
+                    {{#categories}}
+                      <li>{{display_name}}</li>
+                    {{/categories}}
+                  </ul>
+                {{else}}
+                  {{#using items=categories}}
+                    <ul>
+                      {{#items}}
+                        <li>{{display_name}}</li>
+                      {{/items}}
+                    </ul>
+                  {{/using}}
+                {{/if_helpers}}
               {{else}}
                 <span class="empty-message">None</span>
               {{/if}}
-              {{/using}}
             </div>
           </div>
         </div>

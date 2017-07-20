@@ -107,8 +107,26 @@ def get_cycle_created_task_data(notification):
   return merge_dicts(result, assignee_data, tg_assignee_data)
 
 
-def get_cycle_task_due(notification):
-  cycle_task = get_object(CycleTaskGroupObjectTask, notification.object_id)
+def get_cycle_task_due(notification, tasks_cache=None, del_rels_cache=None):
+  """Build data needed for the "task due" email notifications.
+
+  Args:
+    notification (Notification): The notification to aggregate the data for.
+    tasks_cache (dict): prefetched CycleTaskGroupObjectTask instances
+      accessible by their ID as a key
+    del_rels_cache (dict): prefetched Revision instances representing the
+      relationships to Tasks that were deleted grouped by task ID as a key
+  Returns:
+    Data aggregated in a dictionary, grouped by task assignee's email address,
+    which is used as a key.
+  """
+  if tasks_cache is None:
+    tasks_cache = {}
+
+  cycle_task = tasks_cache.get(notification.object_id)
+  if not cycle_task:
+    cycle_task = get_object(CycleTaskGroupObjectTask, notification.object_id)
+
   if not cycle_task:
     logger.warning(
         '%s for notification %s not found.',
@@ -123,14 +141,27 @@ def get_cycle_task_due(notification):
   notif_name = notification.notification_type.name
   due = "due_today" if notif_name == "cycle_task_due_today" else "due_in"
   force = cycle_task.cycle_task_group.cycle.workflow.notify_on_change
+
+  url_filter_exp = u"id={}".format(cycle_task.cycle_id)
+  task_info = get_cycle_task_dict(cycle_task, del_rels_cache=del_rels_cache)
+
+  task_info["task_group"] = cycle_task.cycle_task_group
+  task_info["task_group_url"] = cycle_task_group_url(
+      cycle_task, filter_exp=url_filter_exp)
+
+  task_info["workflow"] = cycle_task.cycle.workflow
+  task_info["workflow_cycle_url"] = cycle_task_workflow_cycle_url(
+      cycle_task, filter_exp=url_filter_exp)
+
   return {
       cycle_task.contact.email: {
           "user": data_handlers.get_person_dict(cycle_task.contact),
+          "today": date.today(),
           "force_notifications": {
               notification.id: force
           },
           due: {
-              cycle_task.id: get_cycle_task_dict(cycle_task)
+              cycle_task.id: task_info
           }
       }
   }
@@ -367,7 +398,8 @@ def get_cycle_task_data(notification, tasks_cache=None, del_rels_cache=None):
                              "quarterly_cycle_task_due_in",
                              "annually_cycle_task_due_in",
                              "cycle_task_due_today"]:
-    return get_cycle_task_due(notification)
+    return get_cycle_task_due(
+        notification, tasks_cache=tasks_cache, del_rels_cache=del_rels_cache)
   elif notification_name == "cycle_task_overdue":
     return get_cycle_task_overdue_data(
         notification, tasks_cache=tasks_cache, del_rels_cache=del_rels_cache)

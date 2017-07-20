@@ -81,4 +81,58 @@
       background: linear-gradient(to bottom, transparent, white 70%);
     }
   }
+
+  .pane-header {
+    display: flex;
+    height: 70px;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+
+    .pane-header__container {
+      width: 100%;
+    }
+
+    .pane-header__title {
+      padding-right: 24px;
+      flex: 7 7;
+
+      .pane-header__title-name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 600px;
+        margin-right: 0px;
+      }
+
+      .state-value {
+        box-sizing: border-box;
+        height: 20px;
+        white-space: nowrap;
+        margin: 0 5px 0 5px;
+        line-height: 19px;
+        display: flex;
+        align-items: center;
+      }
+
+      .verified-icon {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .pane-header__toolbar {
+      display: flex;
+      flex-direction: row-reverse;
+      flex: 3 3;
+
+      .pane-header__toolbar-item {
+        margin-top: 20px;
+
+        /* override "sticky-info-panel" margin */
+        .details-wrap {
+          margin-top: 0px !important;
+        }
+      }
+    }
+  }
 }

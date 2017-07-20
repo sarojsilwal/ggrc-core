@@ -11,6 +11,16 @@ from ggrc.models.mixins import Identifiable
 
 class TestTableArgs(unittest.TestCase):
 
+  DP_MODELS = {
+      "Namespaces",
+      "Attributes",
+      "AttributeDefinitions",
+      "AttributeTypes",
+      "ObjectTypes",
+      "AttributeTemplates",
+      "ObjectTemplates",
+  }
+
   def test_extra_args_included(self):
     """Table args for all models should contain extra args.
 
@@ -18,6 +28,10 @@ class TestTableArgs(unittest.TestCase):
     constraints via __table_args__ instead of _extra_table_args.
     """
     for model in all_models:
+      if model.__name__ in self.DP_MODELS:
+        # Data platform models do not follow normal ggrc model conventions.
+        continue
+
       self.assertTrue(issubclass(model, Identifiable))
 
       extras = getattr(model, "_extra_table_args", None)

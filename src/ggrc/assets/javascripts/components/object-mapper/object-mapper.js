@@ -16,6 +16,15 @@
     Contract: 'Clause'
   };
 
+  var getDefaultType = function (type, object) {
+    var treeView = GGRC.tree_view.sub_tree_for[object];
+    var defaultType =
+      (CMS.Models[type] && type) ||
+      DEFAULT_OBJECT_MAP[object] ||
+      (treeView ? treeView.display_list[0] : 'Control');
+    return defaultType;
+  };
+
   /**
    * A component implementing a modal for mapping objects to other objects,
    * taking the object type mapping constraints into account.
@@ -24,114 +33,103 @@
     tag: 'object-mapper',
     template: can.view(GGRC.mustache_path +
       '/components/object-mapper/object-mapper.mustache'),
-    scope: function (attrs, parentScope, el) {
-      var $el = $(el);
-      var data = {};
-      var id = Number($el.attr('join-object-id'));
-      var object = $el.attr('object');
-      var type = $el.attr('type');
-      var isNew = parentScope.attr('is_new');
-      var treeView = GGRC.tree_view.sub_tree_for[object];
-
-      if (object) {
-        data.object = object;
-      }
-
-      type = CMS.Models[type] && type;
-      if (type) {
-        data.type = type;
-      } else {
-        data.type = DEFAULT_OBJECT_MAP[object];
-        if (!data.type) {
-          data.type = treeView ? treeView.display_list[0] : 'Control';
-        }
-      }
-
-      if (isNew) {
-        data.join_object_id = null;
-      } else if (id || GGRC.page_instance()) {
-        data.join_object_id = id || GGRC.page_instance().id;
-      }
-
-      return {
+    viewModel: function (attrs, parentViewModel) {
+      return GGRC.VM.ObjectOperationsBaseVM.extend({
+        join_object_id: attrs.joinObjectId ||
+          (GGRC.page_instance() && GGRC.page_instance().id),
+        object: attrs.object,
+        type: getDefaultType(attrs.type, attrs.object),
+        relevantTo: parentViewModel.attr('relevantTo'),
+        useSnapshots: GGRC.Utils.Snapshots.isInScopeModel(attrs.object),
         isLoadingOrSaving: function () {
-          return this.attr('mapper.is_saving') ||
+          return this.attr('is_saving') ||
           //  disable changing of object type while loading
           //  to prevent errors while speedily selecting different types
-          this.attr('mapper.is_loading');
+          this.attr('is_loading');
         },
-        mapper: new GGRC.Models.MapperModel(can.extend(data, {
-          relevantTo: parentScope.attr('relevantTo')
-        }))
-      };
+        deferred_to: parentViewModel.attr('deferred_to'),
+        deferred_list: [],
+        deferred: false,
+        allowedToCreate: function () {
+          // Don't allow to create new instances for "In Scope" Objects
+          var isInScopeModel =
+            GGRC.Utils.Snapshots.isInScopeModel(this.attr('object'));
+          return !isInScopeModel;
+        },
+        showWarning: function () {
+          // Never show warning for In Scope Objects
+          if (GGRC.Utils.Snapshots.isInScopeModel(this.attr('object'))) {
+            return false;
+          }
+          return GGRC.Utils.Snapshots.isSnapshotParent(this.attr('object')) ||
+            GGRC.Utils.Snapshots.isSnapshotParent(this.attr('type'));
+        }
+      });
     },
 
     events: {
       '.create-control modal:success': function (el, ev, model) {
-        this.scope.attr('mapper.newEntries').push(model);
-        this.element.find('mapper-results').scope().showNewEntries();
+        this.viewModel.attr('newEntries').push(model);
+        this.element.find('mapper-results').viewModel().showNewEntries();
       },
       '.create-control modal:added': function (el, ev, model) {
-        this.scope.attr('mapper.newEntries').push(model);
+        this.viewModel.attr('newEntries').push(model);
       },
       '.create-control click': function () {
         // reset new entries
-        this.scope.attr('mapper.newEntries', []);
+        this.viewModel.attr('newEntries', []);
       },
       '{window} modal:dismiss': function (el, ev, options) {
-        var joinObjectId = this.scope.attr('mapper.join_object_id');
+        var joinObjectId = this.viewModel.attr('join_object_id');
 
         // mapper sets uniqueId for modal-ajax.
         // we can check using unique id which modal-ajax is closing
         if (options.uniqueId &&
           joinObjectId === options.uniqueId &&
-          this.scope.attr('mapper.newEntries').length > 0) {
-          this.element.find('mapper-results').scope().showNewEntries();
+          this.viewModel.attr('newEntries').length > 0) {
+          this.element.find('mapper-results').viewModel().showNewEntries();
         }
       },
       inserted: function () {
         var self = this;
         var deferredToList;
-        this.scope.attr('mapper.selected').replace([]);
-        this.scope.attr('mapper.entries').replace([]);
+        this.viewModel.attr('selected').replace([]);
+        this.viewModel.attr('entries').replace([]);
 
         this.setModel();
 
-        if (this.scope.attr('deferred_to') &&
-          this.scope.attr('deferred_to').list) {
-          deferredToList = this.scope.attr('deferred_to').list
+        if (this.viewModel.attr('deferred_to.list')) {
+          deferredToList = this.viewModel.attr('deferred_to.list')
             .map(function (item) {
               return {
                 id: item.id,
                 type: item.type
               };
             });
-          this.scope.attr('mapper.deferred_list', deferredToList);
+          this.viewModel.attr('deferred_list', deferredToList);
         }
 
-        setTimeout(function () {
-          self.scope.attr('mapper').afterShown();
-        });
+        self.viewModel.afterShown();
       },
       closeModal: function () {
-        this.scope.attr('mapper.is_saving', false);
+        this.viewModel.attr('is_saving', false);
 
         // TODO: Find proper way to dismiss the modal
         this.element.find('.modal-dismiss').trigger('click');
       },
       deferredSave: function () {
-        var source = this.scope.attr('deferred_to').instance ||
-          this.scope.attr('mapper.object');
+        var source = this.viewModel.attr('deferred_to').instance ||
+          this.viewModel.attr('object');
         var data = {};
 
         data = {
           multi_map: true,
           arr: _.compact(_.map(
-            this.scope.attr('mapper.selected'),
+            this.viewModel.attr('selected'),
             function (desination) {
               var isAllowed = GGRC.Utils.allowed_to_map(source, desination);
               var instance =
-                can.makeArray(this.scope.attr('mapper.entries'))
+                can.makeArray(this.viewModel.attr('entries'))
                   .map(function (entry) {
                     return entry.instance || entry;
                   })
@@ -146,15 +144,15 @@
           ))
         };
 
-        this.scope.attr('deferred_to').controller.element.trigger(
+        this.viewModel.attr('deferred_to').controller.element.trigger(
           'defer:add', [data, {map_and_save: true}]);
         this.closeModal();
       },
       '.modal-footer .btn-map click': function (el, ev) {
-        var type = this.scope.attr('mapper.type');
-        var object = this.scope.attr('mapper.object');
+        var type = this.viewModel.attr('type');
+        var object = this.viewModel.attr('object');
         var instance = CMS.Models[object].findInCacheById(
-          this.scope.attr('mapper.join_object_id'));
+          this.viewModel.attr('join_object_id'));
         var mapping;
         var Model;
         var data = {};
@@ -162,25 +160,27 @@
         var que = new RefreshQueue();
 
         ev.preventDefault();
-        if (el.hasClass('disabled') || this.scope.attr('mapper.is_saving')) {
+        if (el.hasClass('disabled') ||
+          this.viewModel.attr('is_saving')) {
           return;
         }
 
         // TODO: Figure out nicer / proper way to handle deferred save
-        if (this.scope.attr('deferred')) {
+        if (this.viewModel.attr('deferred')) {
           return this.deferredSave();
         }
-        this.scope.attr('mapper.is_saving', true);
+        this.viewModel.attr('is_saving', true);
 
         que.enqueue(instance).trigger().done(function (inst) {
           data.context = instance.context || null;
-          this.scope.attr('mapper.selected').forEach(function (destination) {
+          this.viewModel.attr('selected').forEach(
+          function (destination) {
             var modelInstance;
             var isMapped;
             var isAllowed;
             var isPersonMapping = type === 'Person';
             // Use simple Relationship Model to map Snapshot
-            if (this.scope.attr('mapper.useSnapshots')) {
+            if (this.viewModel.attr('useSnapshots')) {
               modelInstance = new CMS.Models.Relationship({
                 context: data.context,
                 source: instance,
@@ -217,7 +217,7 @@
               $('body').trigger('ajax:flash', {error: message});
             })
             .always(function () {
-              this.scope.attr('mapper.is_saving', false);
+              this.viewModel.attr('is_saving', false);
               this.closeModal();
             }.bind(this))
             .done(function () {
@@ -246,37 +246,35 @@
         }.bind(this));
       },
       setModel: function () {
-        var type = this.scope.attr('mapper.type');
+        var type = this.viewModel.attr('type');
 
-        this.scope.attr(
-          'mapper.model', this.scope.mapper.modelFromType(type));
+        this.viewModel.attr('model', this.viewModel.modelFromType(type));
       },
-      '{mapper} type': function () {
-        var mapper = this.scope.attr('mapper');
-        mapper.attr('filter', '');
-        mapper.attr('afterSearch', false);
+      '{viewModel} type': function () {
+        this.viewModel.attr('filter', '');
+        this.viewModel.attr('afterSearch', false);
         // Edge case for objects that are not in Snapshot scope
         if (!GGRC.Utils.Snapshots.isInScopeModel(
-          mapper.attr('object'))) {
-          mapper.attr('relevant').replace([]);
+          this.viewModel.attr('object'))) {
+          this.viewModel.attr('relevant').replace([]);
         }
         this.setModel();
 
-        setTimeout(mapper.onSubmit.bind(mapper));
+        setTimeout(this.viewModel.onSubmit.bind(this.viewModel));
       }
     },
 
     helpers: {
       get_title: function (options) {
-        var instance = this.attr('mapper.parentInstance');
+        var instance = this.attr('parentInstance');
         return (
           (instance && instance.title) ?
             instance.title :
-            this.attr('mapper.object')
+            this.attr('object')
         );
       },
       get_object: function (options) {
-        var type = CMS.Models[this.attr('mapper.type')];
+        var type = CMS.Models[this.attr('type')];
         if (type && type.title_plural) {
           return type.title_plural;
         }

@@ -36,7 +36,7 @@ class TestComprehensiveSheets(TestCase):
             if model_name not in WHITELIST]
 
   # limit found by trial and error, may need tweaking if models change
-  LIMIT = 38
+  LIMIT = 39
 
   @classmethod
   def setUpClass(cls):

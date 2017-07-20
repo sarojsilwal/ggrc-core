@@ -240,8 +240,7 @@
         draw_children: true,
         parent_instance: pageInstance,
         model: CMS.Models.Threat,
-        mapping: relatedOrOwned + CMS.Models.Threat.table_plural,
-        footer_view: GGRC.mustache_path + '/base_objects/tree_footer.mustache'
+        mapping: relatedOrOwned + CMS.Models.Threat.table_plural
       }
     };
     riskDescriptor = {
@@ -255,8 +254,7 @@
         draw_children: true,
         parent_instance: pageInstance,
         model: CMS.Models.Risk,
-        mapping: relatedOrOwned + CMS.Models.Risk.table_plural,
-        footer_view: GGRC.mustache_path + '/base_objects/tree_footer.mustache'
+        mapping: relatedOrOwned + CMS.Models.Risk.table_plural
       }
     };
 

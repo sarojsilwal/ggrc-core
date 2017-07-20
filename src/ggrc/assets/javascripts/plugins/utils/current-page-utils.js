@@ -11,30 +11,43 @@
    */
   GGRC.Utils.CurrentPage = (function () {
     var queryAPI = GGRC.Utils.QueryAPI;
-    var relatedToCurrentInstance = new can.Map({});
+    var relatedToCurrentInstance = new can.Map({
+      define: {
+        initialized: {
+          type: 'boolean',
+          value: false
+        }
+      }
+    });
 
     var widgetsCounts = new can.Map({});
 
     var QueryAPI = GGRC.Utils.QueryAPI;
     var SnapshotUtils = GGRC.Utils.Snapshots;
 
-    function initMappedInstances(dependentModels, current) {
-      var models = can.makeArray(dependentModels);
+    function initMappedInstances() {
+      var currentPageInstance = GGRC.page_instance();
+      var models = GGRC.Mappings.getMappingList(currentPageInstance.type);
       var reqParams = [];
 
+      relatedToCurrentInstance.attr('initialized', true);
+      models = can.makeArray(models);
+
       models.forEach(function (model) {
-        reqParams.push(queryAPI.buildRelevantIdsQuery(
+        reqParams.push(queryAPI.batchRequests(queryAPI.buildRelevantIdsQuery(
           model,
           {},
           {
-            type: current.type,
-            id: current.id,
+            type: currentPageInstance.type,
+            id: currentPageInstance.id,
             operation: 'relevant'
-          }));
+          })));
       });
 
-      return queryAPI.makeRequest({data: reqParams})
-        .then(function (response) {
+      return can.when.apply(can, reqParams)
+        .then(function () {
+          var response = can.makeArray(arguments);
+
           models.forEach(function (model, idx) {
             var ids = response[idx][model].ids;
             var map = ids.reduce(function (mapped, id) {

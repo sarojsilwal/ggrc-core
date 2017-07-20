@@ -57,13 +57,6 @@
     },
 
     init: function () {
-      var options = this.options;
-      if (options.instance && !options.show_view) {
-        options.show_view =
-          options.instance.constructor[options.options_property].show_view ||
-          options.model[options.options_property].show_view ||
-          GGRC.mustache_path + '/base_objects/tree.mustache';
-      }
       this._draw_node_deferred = can.Deferred();
 
       if (this.options.child_options) {

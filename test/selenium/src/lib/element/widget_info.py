@@ -40,6 +40,10 @@ class CommonInfoDropdownSettings(base.DropdownMenu):
     self.get_dropdown_item(self._elements.DELETE).click()
     return delete_object.DeleteObjectModal(self._driver)
 
+  def select_unmap(self):
+    """Select unmap in 3BBS dropdown modal."""
+    self.get_dropdown_item(self._elements.UNMAP).click()
+
 
 class Snapshots(CommonInfoDropdownSettings):
   """Snapshots 3BBS button/dropdown settings on Info panels."""

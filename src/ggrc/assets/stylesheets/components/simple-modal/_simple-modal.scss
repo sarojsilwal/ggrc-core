@@ -3,7 +3,7 @@
  * Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
  */
 
-$simple-modal-header-height: 42px;
+$simple-modal-header-height: 54px;
 $grid-data-toolbar-height: 42px;
 $grid-data-header-height: 66px;
 
@@ -135,6 +135,23 @@ $grid-data-header-height: 66px;
     font-size: 16px;
     font-weight: normal;
     color: $infoWidgetHeader;
+  }
+
+  &__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    .simple-modal__title__name {
+      margin-right: 10px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .state-value {
+      line-height: 18px;
+    }
   }
 
   &__footer {

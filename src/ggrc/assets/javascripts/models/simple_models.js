@@ -61,7 +61,7 @@
         {attr_title: 'Program URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view: GGRC.mustache_path + '/base_objects/tree_add_item.mustache'
     },

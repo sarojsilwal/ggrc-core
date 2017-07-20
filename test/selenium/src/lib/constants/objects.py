@@ -36,6 +36,7 @@ RISKS = "risks"
 THREATS = "threats"
 RISK_ASSESSMENTS = "risk_assessments"
 CUSTOM_ATTRIBUTES = "custom_attribute_definitions"
+COMMENTS = "comments"
 
 ALL_SNAPSHOTABLE_OBJS = (
     ACCESS_GROUPS, CLAUSES, CONTRACTS, CONTROLS, DATA_ASSETS, FACILITIES,

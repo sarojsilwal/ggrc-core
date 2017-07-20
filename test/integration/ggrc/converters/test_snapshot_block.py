@@ -98,5 +98,6 @@ class TestSnapshotBlockConverter(TestCase):
             ('reference_url', 'Reference URL'),
             ('verify_frequency', 'Frequency'),
             ('document_evidence', 'Evidence'),
+            ('last_assessment_date', 'Last Assessment Date'),
         ]
     )

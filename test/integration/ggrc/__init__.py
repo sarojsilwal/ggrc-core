@@ -34,7 +34,7 @@ class SetEncoder(json.JSONEncoder):
   # pylint: disable=method-hidden
   # false positive: https://github.com/PyCQA/pylint/issues/414
 
-  def default(self, obj):
+  def default(self, obj):  # pylint: disable=arguments-differ
     if isinstance(obj, set):
       return sorted(obj)
     return super(SetEncoder, self).default(obj)
@@ -104,10 +104,17 @@ class TestCase(BaseTestCase, object):
         "test_model",
         "contexts",
         "people",
+        # data platform models that are currently populated with a migration
+        "namespaces",
+        "attribute_definitions",
+        "attribute_types",
+        "object_types",
+        "attribute_templates",
+        "object_templates",
     )
     tables = set(db.metadata.tables).difference(ignore_tables)
     for _ in range(len(tables)):
-      if len(tables) == 0:
+      if not tables:
         break  # stop the loop once all tables have been deleted
       for table in reversed(db.metadata.sorted_tables):
         if table.name in tables:
@@ -156,6 +163,7 @@ class TestCase(BaseTestCase, object):
     responses = defaultdict(lambda: defaultdict(set))
 
     # Set default empty sets for non existing error messages in blocks
+    self.assertNotIn("message", response, str(response))
     for block in response:
       for message in messages:
         error_block = expected_messages.get(block["name"], {})
@@ -222,13 +230,14 @@ class TestCase(BaseTestCase, object):
     return json.loads(response.data)
 
   def import_file(self, filename, dry_run=False, person=None):
+    """Import a csv file as a specific user."""
     if dry_run:
       return self._import_file(filename, dry_run=True, person=person)
-    else:
-      response_dry = self._import_file(filename, dry_run=True, person=person)
-      response = self._import_file(filename, person=person)
-      self.assertEqual(response_dry, response)
-      return response
+
+    response_dry = self._import_file(filename, dry_run=True, person=person)
+    response = self._import_file(filename, person=person)
+    self.assertEqual(response_dry, response)
+    return response
 
   def export_csv(self, data):
     """Export csv handle

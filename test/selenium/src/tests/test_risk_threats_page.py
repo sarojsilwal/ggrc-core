@@ -5,7 +5,7 @@
 # pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
 
-import pytest    # pylint: disable=import-error
+import pytest  # pylint: disable=import-error
 
 from lib import base
 from lib.constants import url
@@ -23,5 +23,7 @@ class TestRiskThreatPage(base.Test):
     object id.
     """
     # pylint: disable=unused-argument
-    assert (url.RISKS + "/" + new_risk_ui.source_obj_id_from_url in
-            new_risk_ui.url)
+    expected_url = (
+        url.RISKS + "/" + new_risk_ui.source_obj_id_from_url)
+    actual_url = new_risk_ui.url
+    assert expected_url in actual_url

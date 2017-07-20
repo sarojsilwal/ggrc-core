@@ -10,6 +10,7 @@ import freezegun
 
 from ggrc import db
 from ggrc.models import all_models
+from ggrc.data_platform import computed_attributes
 
 from integration.ggrc.api_helper import Api
 import integration.ggrc.generator
@@ -86,6 +87,10 @@ class TestWithLastAssessmentDate(BaseQueryAPITestCase):
       assessments[1].status = all_models.Assessment.FINAL_STATE
       db.session.add(assessments[1])
     db.session.commit()
+
+    query = all_models.Revision.query.filter_by(resource_type="Assessment")
+    revision_ids = [revision.id for revision in query]
+    computed_attributes.compute_attributes(revision_ids)
 
   def _create_audit(self, program, title):
     """Make a POST to create an Audit.

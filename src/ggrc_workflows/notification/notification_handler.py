@@ -87,14 +87,29 @@ def add_cycle_task_due_notifications(task):
   if not task.cycle_task_group.cycle.is_current:
     return
 
+  today = date.today()
+
+  # NOTE: when deciding whether or not to create a new notification, we require
+  # the send_on date to be strictly greater than TODAY - new notifications with
+  # send_on date equal to TODAY will not be sent in time, because the cron job
+  # for sending notifications runs soon after midnight (1 AM?)
+  #
+  # Yes, there is a small time window between midnight and the time the daily
+  # notifications are processed and sent, but it unlikely users will work at
+  # those hours. Also, this issue is likely already affecting several other
+  # existing notifications and time checks revolving around TODAY, requiring
+  # a holistic approac to solving it.
+
   notif_type = get_notification_type("{}_cycle_task_due_in".format(
       task.cycle_task_group.cycle.workflow.frequency))
   send_on = task.end_date - timedelta(notif_type.advance_notice)
-  add_notif(task, notif_type, send_on)
+  if send_on > today:
+    add_notif(task, notif_type, send_on)
 
   notif_type = get_notification_type("cycle_task_due_today")
   send_on = task.end_date - timedelta(notif_type.advance_notice)
-  add_notif(task, notif_type, send_on)
+  if send_on > today:
+    add_notif(task, notif_type, send_on)
 
   notif_type = get_notification_type("cycle_task_overdue")
   send_on = task.end_date + timedelta(1)

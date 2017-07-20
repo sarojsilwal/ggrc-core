@@ -16,7 +16,6 @@ from ggrc import db
 from ggrc.models.mixins import Base
 from ggrc.models.reflection import PublishOnly
 from ggrc.models.revision import Revision
-from ggrc.models.object_document import Documentable
 from ggrc import utils
 from ggrc.fulltext.mixin import Indexed
 from ggrc.fulltext import get_indexer
@@ -332,7 +331,7 @@ class CustomAttributeValue(Base, Indexed, db.Model):
       if flags.comment_required:
         failed_preconditions += self._check_mandatory_comment()
       if flags.evidence_required:
-        failed_preconditions += self._check_mandatory_evidence()
+        failed_preconditions += self.attributable.check_mandatory_evidence()
     return failed_preconditions
 
   def _check_mandatory_comment(self):
@@ -348,28 +347,6 @@ class CustomAttributeValue(Base, Indexed, db.Model):
       comment_found = False
     if not comment_found:
       return ["comment"]
-    else:
-      return []
-
-  def _check_mandatory_evidence(self):
-    """Check presence of mandatory evidence."""
-    if isinstance(self.attributable, Documentable):
-      # Note: this is a suboptimal implementation of mandatory evidence check;
-      # it should be refactored once Evicence-CA mapping is introduced
-      def evidence_required(cav):
-        """Return True if an evidence is required for this `cav`."""
-        flags = (self._multi_choice_options_to_flags(cav.custom_attribute)
-                 .get(cav.attribute_value))
-        return flags and flags.evidence_required
-      evidence_found = (len(self.attributable.document_evidence) >=
-                        len([cav
-                             for cav in self.attributable
-                                            .custom_attribute_values
-                             if evidence_required(cav)]))
-    else:
-      evidence_found = False
-    if not evidence_found:
-      return ["evidence"]
     else:
       return []
 

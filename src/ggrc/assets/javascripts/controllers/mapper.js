@@ -42,6 +42,7 @@
   }, {
     init: function () {
       this.element.html(can.view(this.options.component, this.options));
+      document.body.classList.remove('no-events');
     }
   });
   GGRC.Controllers.ObjectMapper.extend('GGRC.Controllers.ObjectSearch', {

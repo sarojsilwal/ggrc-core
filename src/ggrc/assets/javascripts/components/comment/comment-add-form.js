@@ -48,6 +48,7 @@
         comment.save()
           .always(function () {
             this.attr('isSaving', false);
+            this.dispatch('afterCreate');
             this.attr('instance').dispatch('refreshInstance');
           }.bind(this));
       }

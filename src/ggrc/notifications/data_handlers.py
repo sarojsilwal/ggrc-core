@@ -87,7 +87,9 @@ def _get_assignable_dict(people, notif):
                 "start_date_statement": utils.get_digest_date_statement(
                     start_date, "start", True),
                 "url": get_object_url(obj),
-                "notif_created_at": as_user_time(notif.created_at)
+                "notif_created_at": {
+                    notif.id: as_user_time(notif.created_at)
+                }
             }
         }
     }

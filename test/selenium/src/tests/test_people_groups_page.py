@@ -4,7 +4,7 @@
 # pylint: disable=no-self-use
 # pylint: disable=invalid-name
 
-import pytest    # pylint: disable=import-error
+import pytest  # pylint: disable=import-error
 
 from lib import base
 from lib.constants import url
@@ -23,5 +23,7 @@ class TestOrgGroupPage(base.Test):
     object id.
     """
     # pylint: disable=unused-argument
-    assert (url.ORG_GROUPS + "/" + new_org_group_ui.source_obj_id_from_url in
-            new_org_group_ui.url)
+    expected_url = (
+        url.ORG_GROUPS + "/" + new_org_group_ui.source_obj_id_from_url)
+    actual_url = new_org_group_ui.url
+    assert expected_url in actual_url

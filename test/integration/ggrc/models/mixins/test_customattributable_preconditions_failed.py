@@ -270,7 +270,7 @@ class TestPreconditionsFailed(TestCase):
 
     self.assertEqual(preconditions_failed, True)
 
-  def test_preconditions_failed_with_several_mandatory_evidences(self):
+  def test_preconditions_failed_with_missing_several_mandatory_evidences(self):
     """Preconditions failed if count(evidences) < count(evidences_required)."""
     ca1 = CustomAttributeMock(
         self.assessment,
@@ -298,6 +298,29 @@ class TestPreconditionsFailed(TestCase):
     self.assertEqual(preconditions_failed, True)
     self.assertEqual(ca1.value.preconditions_failed, ["evidence"])
     self.assertEqual(ca2.value.preconditions_failed, ["evidence"])
+
+  def test_preconditions_failed_with_several_mandatory_evidences(self):
+    """No preconditions failed if evidences required by CAs are present"""
+    ca1 = CustomAttributeMock(
+        self.assessment,
+        attribute_type="Dropdown",
+        dropdown_parameters=("foo,evidence_required", "0,2"),
+        value="evidence_required"
+    )
+    ca2 = CustomAttributeMock(
+        self.assessment,
+        attribute_type="Dropdown",
+        dropdown_parameters=("foo,evidence_required", "0,2"),
+        value="evidence_required"
+    )
+    # only one evidence provided yet
+    evidence = factories.EvidenceFactory(
+        title="Mandatory evidence",
+    )
+    factories.RelationshipFactory(
+        source=self.assessment,
+        destination=evidence,
+    )
 
     # the second evidence
     evidence = factories.EvidenceFactory(

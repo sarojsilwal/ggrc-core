@@ -570,7 +570,6 @@
         countsName: currentWidgetCountsName,
         mapping: 'current_cycle',
         additional_filter: currentWidgetFilter,
-        header_view: GGRC.mustache_path + '/cycles/tree_header.mustache',
         add_item_view:
           GGRC.mustache_path +
           '/cycle_task_group_object_tasks/tree_add_item.mustache'

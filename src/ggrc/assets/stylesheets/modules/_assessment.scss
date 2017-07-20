@@ -71,36 +71,6 @@
       text-overflow: ellipsis;
     }
 
-    .pane-header {
-      h6 {
-        margin: 0;
-      }
-      .pane-header__title {
-        line-height: 24px;
-        display: flex;
-
-        h3 {
-          line-height: 24px;
-          margin: 0;
-          box-sizing: border-box;
-          padding: 0 16px 0 0;
-        }
-
-        i.fa {
-          line-height: 24px;
-          width: 24px;
-        }
-
-        .state-value {
-          box-sizing: border-box;
-          min-height: 22px;
-          margin: 0 16px 0 0;
-          line-height: 22px;
-          align-self: center;
-        }
-      }
-    }
-
     .assessment-controls {
       h6 {
         margin: 0;
@@ -139,9 +109,18 @@
     }
   }
 
+  .conclusion-small-text {
+    line-height: 4px;
+  }
+
   .tabs-wrap {
     margin-top: -28px;
     position: relative;
+
+    .assessment-attributes-tab {
+      margin-right: 30%;
+      padding-right: 24px;
+    }
 
     .attribute-tab-panel-column {
       display: inline-block;

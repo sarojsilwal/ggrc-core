@@ -259,6 +259,14 @@ class AsmtTmplModal(BaseModal):
 
   def __init__(self, driver):
     super(AsmtTmplModal, self).__init__(driver)
+    self.ui_assignees = base.DropdownStatic(
+        driver, locator.ModalCreateNewAsmtTmpl.ASSIGNEE_DROPDOWN,
+        locator.ModalCreateNewAsmtTmpl.ASSIGNEE_DROPDOWN_OPTION)
+
+  def select_assignee(self, assignee):
+    """Select 'Default Assignees' from drop down list."""
+    self.ui_assignees.select(assignee)
+    return self.__class__(self._driver)
 
 
 class AsmtsModal(BaseModal):

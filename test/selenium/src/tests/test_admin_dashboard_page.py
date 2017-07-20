@@ -8,8 +8,8 @@
 
 import random
 
-import pytest
 import re
+import pytest
 
 from lib import base, constants
 from lib.constants import objects, messages
@@ -38,8 +38,9 @@ class TestAdminDashboardPage(base.Test):
     expected_dict = self._role_el.ROLE_SCOPES_DICT
     actual_dict = admin_roles_tab.get_role_scopes_text_as_dict()
     assert admin_dashboard.tab_roles.member_count == len(expected_dict)
-    assert expected_dict == actual_dict, messages.ERR_MSG_FORMAT.format(
-        expected_dict, actual_dict)
+    assert expected_dict == actual_dict, (
+        messages.AssertionMessages.
+        format_err_msg_equal(expected_dict, expected_dict))
 
   @pytest.mark.smoke_tests
   def test_events_widget_tree_view_has_data(self, admin_dashboard):
@@ -52,7 +53,9 @@ class TestAdminDashboardPage(base.Test):
         re.compile(self._event_el.TREE_VIEW_ROW_REGEXP).
         match(getattr(item, 'text'))]
     assert items_with_incorrect_format == []
-    assert admin_events_tab.widget_header.text == self._event_el.WIDGET_HEADER
+    expected_header_text = self._event_el.WIDGET_HEADER
+    actual_header_text = admin_events_tab.widget_header.text
+    assert expected_header_text == actual_header_text
 
   @pytest.mark.smoke_tests
   def test_check_ca_groups(self, admin_dashboard):
@@ -64,9 +67,7 @@ class TestAdminDashboardPage(base.Test):
         [objects.get_normal_form(item) for item in objects.ALL_CA_OBJS])
     actual_ca_groups_set = set(
         [item.text for item in ca_tab.get_items_list()])
-    assert expected_ca_groups_set == actual_ca_groups_set, (
-        messages.ERR_MSG_FORMAT.format(
-            expected_ca_groups_set, actual_ca_groups_set))
+    assert expected_ca_groups_set == actual_ca_groups_set
 
   @pytest.mark.smoke_tests
   @pytest.mark.parametrize(
@@ -82,4 +83,6 @@ class TestAdminDashboardPage(base.Test):
     ca_tab = admin_dashboard.select_custom_attributes()
     ca_tab.add_custom_attribute(ca_obj=expected_ca)
     list_actual_ca = ca_tab.get_custom_attributes_list(ca_group=expected_ca)
-    assert expected_ca in list_actual_ca
+    assert expected_ca in list_actual_ca, (
+        messages.AssertionMessages.
+        format_err_msg_contains(expected_ca, list_actual_ca))

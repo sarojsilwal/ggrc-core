@@ -60,7 +60,14 @@
               !this.attr('instance.archived');
           },
           set: function () {
-            this.onStateChange({state: 'In Progress', undo: true});
+            this.onStateChange({state: 'In Progress', undo: false});
+          }
+        },
+        isEditDenied: {
+          get: function () {
+            return !Permission
+              .is_allowed_for('update', this.attr('instance')) ||
+              this.attr('instance.archived');
           }
         },
         instance: {}
@@ -68,9 +75,13 @@
       modal: {
         open: false
       },
+      onStateChangeDfd: {},
       formState: {},
       noItemsText: '',
       triggerFormSaveCbs: $.Callbacks(),
+      setInProgressState: function () {
+        this.onStateChange({state: 'In Progress', undo: false});
+      },
       getQuery: function (type, sortObj, additionalFilter) {
         var relevantFilters = [{
           type: this.attr('instance.type'),
@@ -189,30 +200,29 @@
         this.attr('triggerFormSaveCbs').fire();
       },
       onStateChange: function (event) {
-        var undo = event.undo;
-        var state = event.state;
+        var isUndo = event.undo;
+        var newStatus = event.state;
         var instance = this.attr('instance');
         var self = this;
+        var previousStatus = instance.attr('previousStatus') || 'In Progress';
+        this.attr('onStateChangeDfd', can.Deferred());
 
-        if (!instance.attr('_undo')) {
-          instance.attr('_undo', []);
-        }
-
-        if (undo) {
-          instance.attr('_undo').shift();
+        if (isUndo) {
+          instance.attr('previousStatus', undefined);
         } else {
-          instance.attr('_undo').unshift(state);
+          instance.attr('previousStatus', instance.attr('status'));
         }
         instance.attr('isPending', true);
 
         this.attr('formState.formSavedDeferred')
           .then(function () {
             instance.refresh().then(function () {
-              instance.attr('status', state);
+              instance.attr('status', isUndo ? previousStatus : newStatus);
               return instance.save()
               .then(function () {
                 instance.attr('isPending', false);
                 self.initializeFormFields();
+                self.attr('onStateChangeDfd').resolve();
               });
             });
           });

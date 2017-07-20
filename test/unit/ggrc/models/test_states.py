@@ -13,7 +13,7 @@ class TestStates(unittest.TestCase):
 
   BASIC_STATE_OBJECTS = (
       'AccessGroup', 'Clause', 'Contract',
-      'Control', 'DataAsset', 'Directive', 'Facility', 'Issue', 'Market',
+      'Control', 'DataAsset', 'Directive', 'Facility', 'Market',
       'Objective', 'OrgGroup', 'Policy', 'Process', 'Product', 'Program',
       'Project', 'Regulation', 'Risk', 'Section', 'Standard', 'System',
       'SystemOrProcess', 'Threat', 'Vendor')
@@ -57,3 +57,10 @@ class TestStates(unittest.TestCase):
         'In Progress', 'Completed', 'Not Started', 'Verified',
         'Ready for Review')
     self._assert_states('Assessment', assignable_states, 'Not Started')
+
+  def test_issue_states(self):
+    """Test states for Issue object"""
+    issue_states = (
+        'Draft', 'Active', 'Deprecated', 'Fixed', 'Fixed and Verified'
+    )
+    self._assert_states('Issue', issue_states, 'Draft')

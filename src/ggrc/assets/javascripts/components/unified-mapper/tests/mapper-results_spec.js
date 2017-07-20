@@ -51,52 +51,14 @@ describe('GGRC.Components.mapperResults', function () {
     });
   });
 
-  describe('searchOnly() method', function () {
-    it('returns true if it is search only case', function () {
-      var result;
-      viewModel.attr('mapper', {
-        search_only: true
-      });
-      result = viewModel.searchOnly();
-      expect(result).toEqual(true);
-    });
-    it('returns false if it is not search-only case', function () {
-      var result;
-      viewModel.attr('mapper', {
-        search_only: false
-      });
-      result = viewModel.searchOnly();
-      expect(result).toEqual(false);
-    });
-  });
-
-  describe('useSnapshots() method', function () {
-    it('returns true if it is use-snapshots case', function () {
-      var result;
-      viewModel.attr('mapper', {
-        useSnapshots: true
-      });
-      result = viewModel.useSnapshots();
-      expect(result).toEqual(true);
-    });
-    it('returns false if it is not use-snapshots case', function () {
-      var result;
-      viewModel.attr('mapper', {
-        useSnapshots: false
-      });
-      result = viewModel.useSnapshots();
-      expect(result).toEqual(false);
-    });
-  });
-
   describe('showNewEntries() method', function () {
     beforeEach(function () {
-      viewModel.attr('mapper', {});
+      viewModel.attr({});
     });
 
     it('updates viewModel.selected', function () {
       viewModel.attr('selected', []);
-      viewModel.attr('mapper.newEntries', [
+      viewModel.attr('newEntries', [
           {id: 'mockId', type: 'mockType'}
       ]);
       spyOn(viewModel, 'transformValue')
@@ -121,7 +83,7 @@ describe('GGRC.Components.mapperResults', function () {
 
     it('updates viewModel.prevSelected', function () {
       viewModel.attr('prevSelected', []);
-      viewModel.attr('mapper.newEntries', [
+      viewModel.attr('newEntries', [
           {id: 'mockId', type: 'mockType'}
       ]);
       spyOn(viewModel, 'transformValue')
@@ -162,10 +124,10 @@ describe('GGRC.Components.mapperResults', function () {
       expect(viewModel.attr('paging.current')).toEqual(1);
     });
 
-    it('sets mapper.afterSearch to true', function () {
-      viewModel.attr('mapper.afterSearch', false);
+    it('sets afterSearch to true', function () {
+      viewModel.attr('afterSearch', false);
       viewModel.showNewEntries();
-      expect(viewModel.attr('mapper.afterSearch')).toEqual(true);
+      expect(viewModel.attr('afterSearch')).toEqual(true);
     });
   });
 
@@ -180,7 +142,7 @@ describe('GGRC.Components.mapperResults', function () {
         .and.returnValue($.Deferred().resolve(items));
       spyOn(viewModel, 'setColumnsConfiguration');
       spyOn(viewModel, 'setRelatedAssessments');
-      viewModel.attr('mapper', {});
+      viewModel.attr({});
     });
 
     it('sets loaded items to viewModel.items', function () {
@@ -193,11 +155,11 @@ describe('GGRC.Components.mapperResults', function () {
         }));
     });
 
-    it('sets data of loaded items to viewModel.mapper.entries', function () {
-      viewModel.attr('mapper.entries', []);
+    it('sets data of loaded items to viewModel.entries', function () {
+      viewModel.attr('entries', []);
       viewModel.setItems();
-      expect(viewModel.attr('mapper.entries').length).toEqual(1);
-      expect(viewModel.attr('mapper.entries')[0])
+      expect(viewModel.attr('entries').length).toEqual(1);
+      expect(viewModel.attr('entries')[0])
         .toEqual('mockData');
     });
 
@@ -254,7 +216,7 @@ describe('GGRC.Components.mapperResults', function () {
 
   describe('setRelatedAssessments() method', function () {
     beforeEach(function () {
-      viewModel.attr('mapper', {});
+      viewModel.attr({});
       viewModel.attr('relatedAssessments', {});
       spyOn(viewModel, 'getDisplayModel')
         .and.returnValue({
@@ -266,14 +228,14 @@ describe('GGRC.Components.mapperResults', function () {
 
     it('sets relatedAssessments.show to false if it is use-snapshots case',
       function () {
-        viewModel.attr('mapper.useSnapshots', true);
+        viewModel.attr('useSnapshots', true);
         viewModel.setRelatedAssessments();
         expect(viewModel.attr('relatedAssessments.show')).toEqual(false);
       });
 
     it('updates relatedAssessments.show if it is not use-snapshots case',
       function () {
-        viewModel.attr('mapper.useSnapshots', false);
+        viewModel.attr('useSnapshots', false);
         viewModel.setRelatedAssessments();
         expect(viewModel.attr('relatedAssessments.show')).toEqual(true);
       });
@@ -353,9 +315,9 @@ describe('GGRC.Components.mapperResults', function () {
       id: 123
     }];
     beforeEach(function () {
-      viewModel.attr('mapper.relevant', relevantList);
+      viewModel.attr('relevant', relevantList);
     });
-    it('returns relevant filters from mapper', function () {
+    it('returns relevant filters', function () {
       var result = viewModel.prepareRelevantFilters();
       expect(result).toEqual(expectedResult);
     });
@@ -445,8 +407,7 @@ describe('GGRC.Components.mapperResults', function () {
 
       it('returns query', function () {
         var result;
-        spyOn(viewModel, 'useSnapshots')
-          .and.returnValue(false);
+        viewModel.attr('useSnapshots', false);
         spyOn(viewModel, 'prepareBaseQuery')
           .and.returnValue({mockData: 'base'});
         result = viewModel.getQuery();
@@ -463,8 +424,7 @@ describe('GGRC.Components.mapperResults', function () {
       it('adds paging to query if addPaging is true', function () {
         var result;
         var paging;
-        spyOn(viewModel, 'useSnapshots')
-          .and.returnValue(false);
+        viewModel.attr('useSnapshots', false);
         spyOn(viewModel, 'prepareBaseQuery')
           .and.returnValue({mockData: 'basePaging'});
         result = viewModel.getQuery(undefined, true);
@@ -485,8 +445,7 @@ describe('GGRC.Components.mapperResults', function () {
     it('adds paging with sort to query if sort.key is defined', function () {
       var result;
       var paging;
-      spyOn(viewModel, 'useSnapshots')
-        .and.returnValue(false);
+      viewModel.attr('useSnapshots', false);
       spyOn(viewModel, 'prepareBaseQuery')
         .and.returnValue({mockData: 'basePagingSort'});
       result = viewModel.getQuery(undefined, true);
@@ -506,8 +465,7 @@ describe('GGRC.Components.mapperResults', function () {
     it('sets "read" to permissions if model is person', function () {
       var result;
       viewModel.attr('type', 'Person');
-      spyOn(viewModel, 'useSnapshots')
-        .and.returnValue(false);
+      viewModel.attr('useSnapshots', false);
       spyOn(viewModel, 'prepareBaseQuery')
         .and.returnValue({mockData: 'basePagingSort'});
       result = viewModel.getQuery('Person', true);
@@ -520,8 +478,7 @@ describe('GGRC.Components.mapperResults', function () {
 
     it('transform query to snapshot if useSnapshots is true', function () {
       var result;
-      spyOn(viewModel, 'useSnapshots')
-        .and.returnValue(true);
+      viewModel.attr('useSnapshots', true);
       spyOn(viewModel, 'prepareBaseQuery')
         .and.returnValue({mockData: 'base'});
       spyOn(GGRC.Utils.Snapshots, 'transformQuery')
@@ -537,10 +494,9 @@ describe('GGRC.Components.mapperResults', function () {
       }));
     });
 
-    it('set "read" permission if "search_only"', function () {
+    it('set "read" permission if "searchOnly"', function () {
       var result;
-      spyOn(viewModel, 'searchOnly')
-        .and.returnValue(true);
+      viewModel.attr('searchOnly', true);
       spyOn(viewModel, 'prepareBaseQuery')
         .and.returnValue({mockData: 'base'});
       result = viewModel.getQuery();
@@ -566,8 +522,7 @@ describe('GGRC.Components.mapperResults', function () {
   describe('getModelKey() method', function () {
     it('returns "Snapshot" if useSnapshots is true', function () {
       var result;
-      spyOn(viewModel, 'useSnapshots')
-        .and.returnValue(true);
+      viewModel.attr('useSnapshots', true);
       result = viewModel.getModelKey();
       expect(result).toEqual('Snapshot');
     });
@@ -575,8 +530,7 @@ describe('GGRC.Components.mapperResults', function () {
     it('returns type of model if useSnapshots is false', function () {
       var result;
       viewModel.attr('type', 'Mock');
-      spyOn(viewModel, 'useSnapshots')
-        .and.returnValue(false);
+      viewModel.attr('useSnapshots', false);
       result = viewModel.getModelKey();
       expect(result).toEqual('Mock');
     });
@@ -625,24 +579,22 @@ describe('GGRC.Components.mapperResults', function () {
     }];
 
     it('does nothing if viewModel.searchOnly() is true', function () {
-      spyOn(viewModel, 'searchOnly')
-        .and.returnValue(true);
+      viewModel.attr('searchOnly', true);
       viewModel.setDisabledItems(allItems, relatedIds);
       expect(allItems).toEqual(allItems);
     });
 
-    it('does nothing if it is case of assesment generation',
+    it('does nothing if it is case of object generation',
       function () {
-        viewModel.attr('mapper', {
-          assessmentGenerator: {}
+        viewModel.attr({
+          objectGenerator: true
         });
         viewModel.setDisabledItems(allItems, relatedIds);
         expect(allItems).toEqual(allItems);
       });
 
     it('updates disabled items', function () {
-      spyOn(viewModel, 'searchOnly')
-        .and.returnValue(false);
+      viewModel.attr('searchOnly', false);
       viewModel.setDisabledItems(allItems, relatedIds);
       expect(allItems).toEqual(expectedResult);
     });
@@ -691,8 +643,7 @@ describe('GGRC.Components.mapperResults', function () {
     it('returns transformed value', function () {
       var result;
       var value = 'mockValue';
-      spyOn(viewModel, 'useSnapshots')
-        .and.returnValue(false);
+      viewModel.attr('useSnapshots', false);
       result = viewModel.transformValue(value);
       expect(result).toEqual('transformedValue');
     });
@@ -713,8 +664,7 @@ describe('GGRC.Components.mapperResults', function () {
         };
         spyOn(GGRC.Utils.Snapshots, 'toObject')
           .and.returnValue('snapshot');
-        spyOn(viewModel, 'useSnapshots')
-          .and.returnValue(true);
+        viewModel.attr('useSnapshots', true);
         result = viewModel.transformValue(value);
         expect(result).toEqual(expectedResult);
       });
@@ -831,7 +781,7 @@ describe('GGRC.Components.mapperResults', function () {
     var dfdRequest;
 
     beforeEach(function () {
-      viewModel.attr('mapper', {});
+      viewModel.attr({});
       dfdRequest = can.Deferred();
       spyOn(GGRC.Utils.QueryAPI, 'makeRequest')
         .and.returnValue(dfdRequest.promise());
@@ -846,7 +796,7 @@ describe('GGRC.Components.mapperResults', function () {
     it('rerturns promise with items', function (done) {
       var responseArr = [data, filters];
       dfdRequest.resolve(responseArr);
-      viewModel.attr('mapper.assessmentGenerator', true);
+      viewModel.attr('objectGenerator', true);
       resultDfd = viewModel.loadAllItemsIds();
       expect(resultDfd.state()).toEqual('resolved');
       resultDfd.then(function (result) {
@@ -859,7 +809,7 @@ describe('GGRC.Components.mapperResults', function () {
       function (done) {
         var responseArr = [data, filters];
         dfdRequest.resolve(responseArr);
-        viewModel.attr('mapper.assessmentGenerator', false);
+        viewModel.attr('objectGenerator', false);
         resultDfd = viewModel.loadAllItemsIds();
         expect(resultDfd.state()).toEqual('resolved');
         resultDfd.then(function (result) {
@@ -871,7 +821,7 @@ describe('GGRC.Components.mapperResults', function () {
     it('rerturns promise with empty array if fail',
       function (done) {
         dfdRequest.reject();
-        viewModel.attr('mapper.assessmentGenerator', true);
+        viewModel.attr('objectGenerator', true);
         resultDfd = viewModel.loadAllItemsIds();
         expect(resultDfd.state()).toEqual('resolved');
         resultDfd.then(function (result) {
@@ -1062,7 +1012,7 @@ describe('GGRC.Components.mapperResults', function () {
       var Component = GGRC.Components.get('mapperResults');
       Component.prototype.viewModel.init = undefined;
       viewModel = GGRC.Components.getViewModel('mapperResults');
-      viewModel.attr('mapper', {});
+      viewModel.attr({});
     });
 
     it('method should return data from "relatedData" array',
@@ -1089,7 +1039,7 @@ describe('GGRC.Components.mapperResults', function () {
         };
         var result;
 
-        viewModel.attr('mapper.deferred_list', [
+        viewModel.attr('deferredList', [
           {id: 5, type: 'Snapshot'},
           {id: 25, type: 'Snapshot'}
         ]);
@@ -1105,7 +1055,7 @@ describe('GGRC.Components.mapperResults', function () {
       function () {
         var result;
 
-        viewModel.attr('mapper.deferred_list', [
+        viewModel.attr('deferredList', [
           {id: 5, type: 'Snapshot'},
           {id: 25, type: 'Snapshot'}
         ]);

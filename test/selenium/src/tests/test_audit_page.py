@@ -12,6 +12,7 @@ from lib import base
 from lib.constants import messages
 from lib.entities import entities_factory
 from lib.service import webui_service
+from lib.utils import string_utils
 
 
 class TestAuditPage(base.Test):
@@ -72,8 +73,8 @@ class TestAuditPage(base.Test):
     actual_asmt_tmpls = [actual_asmt_tmpl.update_attrs(updated_at=None)
                          for actual_asmt_tmpl in actual_asmt_tmpls]
     assert [expected_asmt_tmpl] == actual_asmt_tmpls, (
-        messages.ERR_MSG_FORMAT.format(
-            [expected_asmt_tmpl], actual_asmt_tmpls))
+        messages.AssertionMessages.
+        format_err_msg_equal([expected_asmt_tmpl], actual_asmt_tmpls))
 
   @pytest.mark.smoke_tests
   def test_asmt_creation(self, new_program_rest, new_audit_rest, selenium):
@@ -95,7 +96,8 @@ class TestAuditPage(base.Test):
     actual_asmts = [actual_asmt.update_attrs(updated_at=None)
                     for actual_asmt in actual_asmts]
     assert [expected_asmt] == actual_asmts, (
-        messages.ERR_MSG_FORMAT.format([expected_asmt], actual_asmts))
+        messages.AssertionMessages.
+        format_err_msg_equal([expected_asmt], actual_asmts))
 
   @pytest.mark.smoke_tests
   @pytest.mark.parametrize(
@@ -140,7 +142,8 @@ class TestAuditPage(base.Test):
         update_attrs(is_replace_attrs=False, custom_attributes={None: None})
         for actual_asmt in actual_asmts]
     assert expected_asmts == actual_asmts, (
-        messages.ERR_MSG_FORMAT.format(expected_asmts, actual_asmts))
+        messages.AssertionMessages.
+        format_err_msg_equal(expected_asmts, actual_asmts))
 
   @pytest.mark.smoke_tests
   @pytest.mark.cloning
@@ -154,7 +157,8 @@ class TestAuditPage(base.Test):
     actual_audit = (
         create_and_clone_audit["actual_audit"].update_attrs(slug=None))
     assert expected_audit == actual_audit, (
-        messages.ERR_MSG_FORMAT.format(expected_audit, actual_audit))
+        messages.AssertionMessages.
+        format_err_msg_equal(expected_audit, actual_audit))
 
   @pytest.mark.smoke_tests
   @pytest.mark.cloning
@@ -199,8 +203,8 @@ class TestAuditPage(base.Test):
         actual_asmt_tmpl.update_attrs(slug=None, updated_at=None)
         for actual_asmt_tmpl in actual_asmt_tmpls]
     assert [expected_asmt_tmpl] == actual_asmt_tmpls, (
-        messages.ERR_MSG_FORMAT.format(
-            [expected_asmt_tmpl], actual_asmt_tmpls))
+        messages.AssertionMessages.
+        format_err_msg_equal([expected_asmt_tmpl], actual_asmt_tmpls))
 
   @pytest.mark.smoke_tests
   @pytest.mark.cloning
@@ -225,7 +229,12 @@ class TestAuditPage(base.Test):
                        get_list_objs_from_tree_view(src_obj=actual_audit))
     actual_programs = (webui_service.ProgramsService(selenium).
                        get_list_objs_from_tree_view(src_obj=actual_audit))
-    expected_objs = [[expected_control], [expected_program]]
-    actual_objs = [actual_controls, actual_programs]
+    expected_objs = (
+        string_utils.convert_list_elements_to_list(
+            [[expected_control], [expected_program]]))
+    actual_objs = (
+        string_utils.convert_list_elements_to_list(
+            [actual_controls, actual_programs]))
     assert expected_objs == actual_objs, (
-        messages.ERR_MSG_FORMAT.format(expected_objs, actual_objs))
+        messages.AssertionMessages.
+        format_err_msg_equal(expected_objs, actual_objs))

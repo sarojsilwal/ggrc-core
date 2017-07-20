@@ -5,3 +5,4 @@
 WIDGET_TITLE_AND_COUNT = r"(.*) \((.*)\)"
 URL_WIDGET_INFO = (
     r"//[0-9a-z\-.]*[:0-9]*?/([a-z_]*)/?(\d*)#?([^/]*)/([a-z_]*)/?(\d*)/*")
+TEXT_WITHIN_PARENTHESES = r"\([^)]*\) "

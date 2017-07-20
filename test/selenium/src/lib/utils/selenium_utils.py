@@ -16,6 +16,12 @@ from lib.constants import messages
 LOGGER = logging.getLogger(__name__)
 
 
+def _webdriver_wait(driver):
+  """Common WebDriverWait logic with poll frequency."""
+  return WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS,
+                       poll_frequency=constants.ux.POLL_FREQUENCY)
+
+
 def hover_over_element(driver, element):
   """Move mouse pointer to element and hover."""
   action_chains.ActionChains(driver).move_to_element(element).perform()
@@ -34,9 +40,9 @@ def switch_to_new_window(driver):
   try:
     wait_until_condition(driver, EC.new_window_is_opened)
     driver.switch_to.window(driver.window_handles.pop())
-  except exceptions.NoSuchWindowException as exception:
-    LOGGER.exception(exception, messages.ERR_SWITCH_TO_NEW_WINDOW)
-    raise exception
+  except:
+    raise exceptions.NoSuchWindowException(
+        messages.ExceptionsMessages.err_switch_to_new_window)
 
 
 def wait_until_stops_moving(element):
@@ -69,13 +75,13 @@ def get_when_visible(driver, locator):
  Args: driver (base.CustomDriver), locator (tuple)
  Return: selenium.webdriver.remote.webelement.WebElement
  """
-  return (WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS).
-          until(EC.presence_of_element_located(locator)))
+  return (_webdriver_wait(driver).
+          until(EC.visibility_of_element_located(locator)))
 
 
 def wait_until_condition(driver, condition):
   """Wait until given expected condition is met."""
-  WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS).until(condition)
+  _webdriver_wait(driver).until(condition)
 
 
 def wait_until_not_present(driver, locator):
@@ -88,8 +94,8 @@ def get_when_all_visible(driver, locator):
  Args: driver (base.CustomDriver), locator (tuple)
  Return: selenium.webdriver.remote.webelement.WebElements
  """
-  return (WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS).
-          until(EC.visibility_of_any_elements_located(locator)))
+  return (_webdriver_wait(driver).
+          until(EC.visibility_of_all_elements_located(locator)))
 
 
 def get_when_clickable(driver, locator):
@@ -97,7 +103,7 @@ def get_when_clickable(driver, locator):
  Args: driver (base.CustomDriver), locator (tuple)
  Return: selenium.webdriver.remote.webelement.WebElement
  """
-  return (WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS).
+  return (_webdriver_wait(driver).
           until(EC.element_to_be_clickable(locator)))
 
 
@@ -106,7 +112,7 @@ def get_when_invisible(driver, locator):
  Args: driver (base.CustomDriver), locator (tuple)
  Return: selenium.webdriver.remote.webelement.WebElement
  """
-  return (WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS).
+  return (_webdriver_wait(driver).
           until(EC.invisibility_of_element_located(locator)))
 
 
@@ -114,7 +120,7 @@ def wait_for_element_text(driver, locator, text):
   """
     Args: driver (base.CustomDriver), locator (tuple), text (str)
  """
-  return (WebDriverWait(driver, constants.ux.MAX_USER_WAIT_SECONDS).
+  return (_webdriver_wait(driver).
           until(EC.text_to_be_present_in_element(locator, text)))
 
 
@@ -204,6 +210,14 @@ def is_element_enabled(element):
   return all([el.is_enabled() and
               not is_value_in_attr(el, value="disabled")
               for el in elements_to_check])
+
+
+def is_element_checked(driver, element):
+  """Check DOM input element checked property using JS.
+  Args: driver (base.CustomDriver), locator (tuple)
+  Return: True if element is checked, False if element is not checked.
+  """
+  return driver.execute_script("return arguments[0].checked", element)
 
 
 def get_nested_elements(element, all_nested=False):

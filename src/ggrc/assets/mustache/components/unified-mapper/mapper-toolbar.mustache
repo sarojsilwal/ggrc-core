@@ -3,70 +3,69 @@
     Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 }}
 <div class="filters-row">
-  {{#mapper.useTemplates}}
+  {{#if useTemplates}}
     <div class="col">
       <assessment-templates
-        instance="mapper.parentInstance"
-        type="mapper.type"
+        instance="parentInstance"
+        type="type"
         binding="related_assessment_templates"
-        assessment-template="mapper.assessmentTemplate"
-        mapper="mapper"
+        assessment-template="assessmentTemplate"
       ></assessment-templates>
     </div>
-  {{/mapper.useTemplates}}
+  {{/if}}
   <div class="col">
     <h6>Object type</h6>
-    <mapping-type-selector types="mapper.types" selected-type="mapper.type"
+    <mapping-type-selector types="availableTypes" selected-type="type"
                            disabled="isLoadingOrSaving"></mapping-type-selector>
   </div>
-  {{^mapper.useTemplates}}
-    {{#if mapper.allowedToCreate}}
-      {{#is_allowed 'create' mapper.model.singular context='any'}}
-        {{#if_equals mapper.type 'AssessmentTemplate'}}
+  {{^if useTemplates}}
+    {{#if allowedToCreate}}
+      {{#is_allowed 'create' model.singular context='any'}}
+        {{#if_equals type 'AssessmentTemplate'}}
           <div class="col create">
             <a
               class="btn btn-small btn-white create-control"
               href="javascript://"
               data-toggle="modal-ajax-form"
-              data-unique-id="{{mapper.join_object_id}}"
+              data-unique-id="{{join_object_id}}"
               data-modal-class="modal-wide"
               data-object-singular="{{model_info 'AssessmentTemplate' 'model_singular'}}"
               data-object-plural="{{model_info 'AssessmentTemplate' 'root_collection'}}"
               data-object-params='{
                   "audit": {
-                      "id": {{mapper.parentInstance.id}},
-                      "type": "{{mapper.parentInstance.type}}"
+                      "id": {{parentInstance.id}},
+                      "type": "{{parentInstance.type}}"
                   },
                   "context": {
-                      "id": {{mapper.parentInstance.context.id}},
-                      "type": "{{json_escape mapper.parentInstance.context.type}}"
+                      "id": {{parentInstance.context.id}},
+                      "type": "{{json_escape parentInstance.context.type}}"
                   },
-                  "audit_title": "{{json_escape mapper.parentInstance.title}}"
+                  "audit_title": "{{json_escape parentInstance.title}}"
                 }'
-              data-join-object-id="{{mapper.join_object_id}}">
-              Create {{mapper.model.title_singular}}
+              data-join-object-id="{{join_object_id}}">
+              Create {{model.title_singular}}
             </a>
           </div>
         {{else}}
-          {{^if mapper.showWarning}}
+          {{^if showWarning}}
             <div class="col create">
               <a
                 class="btn btn-small btn-white create-control"
                 href="javascript://"
                 data-toggle="modal-ajax-form"
-                data-unique-id="{{mapper.join_object_id}}"
+                data-unique-id="{{join_object_id}}"
                 data-modal-class="modal-wide"
-                data-object-singular="{{mapper.model.singular}}"
-                data-object-plural="{{mapper.model.plural}}"
-                data-join-object-id="{{mapper.join_object_id}}">
-                Create {{mapper.model.title_singular}}
+                data-object-singular="{{model.singular}}"
+                data-object-plural="{{model.plural}}"
+                data-join-object-id="{{join_object_id}}">
+                Create {{model.title_singular}}
               </a>
             </div>
           {{/if}}
         {{/if_equals}}
       {{/is_allowed}}
     {{/if}}
-  {{/mapper.useTemplates}}
+  {{/if}}
 
   <div class="col filter">
     <h6>Filter</h6>
@@ -87,21 +86,20 @@
 </div>
 </div>
 <div class="filter-mapping">
-  <relevant-filter search_only="mapper.search_only"
-                   type="mapper.type"
-                   relevant-to="mapper.relevantTo"
-                   relevant="mapper.relevant"
+  <relevant-filter type="type"
+                   relevant-to="relevantTo"
+                   relevant="relevant"
   ></relevant-filter>
 </div>
 <div class="filter-buttons">
-  {{#mapper.afterSearch}}
+  {{#if afterSearch}}
     {{#totalObjects}}
       <div class="objects-found {{#isLoading}}loading{{/isLoading}}">
         <label>{{totalObjects}} {{#objectsPlural}}
           Objects{{/objectsPlural}} {{^objectsPlural}}Object{{/objectsPlural}} found</label>
       </div>
     {{/totalObjects}}
-  {{/mapper.afterSearch}}
+  {{/if}}
   <button can-click="onSubmit" class="btn btn-small btn-lightBlue" {{#isLoading}}disabled="disabled"{{/isLoading}}>Search
   </button>
 </div>

@@ -389,7 +389,8 @@ def send_email(user_email, subject, body):
 def modify_data(data):
   """Modify notification data dictionary.
 
-  For easier use in templates, it joins the due_in and due today fields
+  For easier use in templates, it computes/aggregates some additional
+  notification data.
   together.
 
   Args:
@@ -399,13 +400,6 @@ def modify_data(data):
     dict: the received dict with some additional fields for easier traversal
       in the notification template.
   """
-
-  data["due_soon"] = {}
-  if "due_in" in data:
-    data["due_soon"].update(data["due_in"])
-  if "due_today" in data:
-    data["due_soon"].update(data["due_today"])
-
   # combine "my_tasks" from multiple cycles
   data["cycle_started_tasks"] = {}
   if "cycle_data" in data:

@@ -12,7 +12,7 @@
   </h2>
 </div>
 <div class="modal-filter modal-body">
-  {{#if mapper.showWarning}}
+  {{#if showWarning}}
     <div class="alert alert-error">
       <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
       System will create snapshot of the current object for the selected Audit
@@ -20,30 +20,36 @@
     </div>
   {{/if}}
   <mapper-toolbar class="flex-box search-toolbar flex-box-multi"
-                  mapper="mapper"
-                  is-loading="mapper.is_loading"
-                  {(filter)}="mapper.filter"
-                  (submit)="mapper.onSubmit()"
+                  is-loading="is_loading"
+                  {(filter)}="filter"
+                  (submit)="onSubmit()"
                   total-objects="totalObjects"
-                  {(status-filter)}="mapper.statusFilter">
+                  {(status-filter)}="statusFilter"
+                  {(type)}="type"
+                  {after-search}="afterSearch">
   </mapper-toolbar>
   <hr/>
   <mapper-results
-    class="{{#mapper.useSnapshots}}snapshot-list{{/mapper.useSnapshots}}
-      {{^mapper.afterSearch}}hidden{{/mapper.afterSearch}}"
-    base-instance="mapper.parentInstance"
-    {(is-loading)}="mapper.is_loading"
-    object="mapper.object"
-    mapper="mapper"
-    type="mapper.type"
-    selected="mapper.selected"
-    filter="mapper.filter"
-    submit-cbs="mapper.submitCbs"
+    class="{{#useSnapshots}}snapshot-list{{/useSnapshots}}
+      {{^afterSearch}}hidden{{/afterSearch}}"
+    base-instance="parentInstance"
+    {(is-loading)}="is_loading"
+    object="object"
+    type="type"
+    selected="selected"
+    filter="filter"
+    submit-cbs="submitCbs"
     {^paging.total}="totalObjects"
-    status-filter="mapper.statusFilter">
+    status-filter="statusFilter"
+    {use-snapshots}="useSnapshots"
+    {new-entries}="newEntries"
+    {(after-search)}="afterSearch"
+    {(entries)}="entries"
+    {relevant}="relevant"
+    {deferred-list}="deferred_list">
   </mapper-results>
   <div class="well well-small
-              {{#mapper.afterSearch}}hidden{{/mapper.afterSearch}}">
+              {{#afterSearch}}hidden{{/afterSearch}}">
     No results
   </div>
 </div>
@@ -55,19 +61,19 @@
     </div>
     <div class="span7">
       <div class="confirm-buttons">
-        {{mapper.selected.length}}
+        {{selected.length}}
         object(s) selected
         </span>
 
         <button class="btn-map btn btn-small btn-green preventdoubleclick"
-                {{^if mapper.selected.length}}disabled="disabled"{{/if}}>
-          {{#if mapper.is_saving}}
+                {{^if selected.length}}disabled="disabled"{{/if}}>
+          {{#if is_saving}}
             Saving, please wait...
           {{else}}
             Map Selected
           {{/if}}
         </button>
-        <spinner toggle="mapper.is_saving"></spinner>
+        <spinner toggle="is_saving"></spinner>
       </div>
     </div>
   </div>

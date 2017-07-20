@@ -117,7 +117,8 @@
 
       <div class="span6">
         <div class="row-fluid choose-from-select">
-          <div class="span6 bottom-spacing">
+
+          <div class="span6 bottom-spacing{{#validation_error instance.computed_errors 'default_people.assessors'}} field-failure{{/validation_error}}">
             <label>
               Default Assignees
               <span class="required">*</span>
@@ -127,8 +128,15 @@
               options-list="instance.people_values"
               name="instance.default_people.assessors"
               on-change="instance.defaultAssesorsChanged"
+              no-value="true"
+              no-value-label=" "
             ></dropdown>
+
+            {{#validation_error instance.computed_errors 'default_people.assessors'}}
+              <label class="help-inline warning">{{errors.0}}</label>
+            {{/validation_error}}
           </div>
+
 
           <div class="span6{{#instance.computed_errors.assessorsList}} field-failure{{/instance.computed_errors.assessorsList}}">
             <label>&nbsp;</label>

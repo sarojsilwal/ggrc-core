@@ -33,7 +33,7 @@
         {attr_title: 'Title', attr_name: 'title'},
         {attr_title: 'Code', attr_name: 'slug'},
         {attr_title: 'Start Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'},
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'},
         {
           attr_title: 'Risk Manager',
           attr_name: 'ra_manager',

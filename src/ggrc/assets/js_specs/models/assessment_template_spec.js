@@ -18,31 +18,7 @@ describe('can.Model.AssessmentTemplate', function () {
   });
 
   describe('_choosableObjectTypes() method', function () {
-    var fakeMapper;  // an instance of the fake MapperModel
-    var origMapperModel;
-
-    beforeEach(function () {
-      var FakeMapperModel;
-
-      origMapperModel = GGRC.Models.MapperModel;
-
-      // mock the MapperModel used by the method under test
-      fakeMapper = {
-        initTypes: jasmine.createSpy()
-      };
-      FakeMapperModel = jasmine.createSpy().and.callFake(function (config) {
-        return fakeMapper;
-      });
-
-      GGRC.Models.MapperModel = FakeMapperModel;
-    });
-
-    afterEach(function () {
-      // restore the mocked MapperModel
-      GGRC.Models.MapperModel = origMapperModel;
-    });
-
-    it('returns the types obtained from the mapper model', function () {
+    it('returns the types obtained from the GGRC.Mappings', function () {
       var result;
 
       var objectTypes = {
@@ -56,7 +32,7 @@ describe('can.Model.AssessmentTemplate', function () {
         }
       };
 
-      fakeMapper.initTypes.and.returnValue(objectTypes);
+      spyOn(GGRC.Mappings, 'getMappingTypes').and.returnValue(objectTypes);
       result = instance._choosableObjectTypes();
       expect(result).toEqual(objectTypes);
     });
@@ -77,7 +53,8 @@ describe('can.Model.AssessmentTemplate', function () {
         {name: 'Bar'}, {name: 'Car'}, {name: 'Dar'}, {name: 'Zar'}
       ];
 
-      fakeMapper.initTypes.and.returnValue(objectTypes);
+      spyOn(GGRC.Mappings, 'getMappingTypes').and.returnValue(objectTypes);
+
       result = instance._choosableObjectTypes();
       expect(result.groupFoo.items).toEqual(expected);
     });
@@ -92,7 +69,8 @@ describe('can.Model.AssessmentTemplate', function () {
         }
       };
 
-      fakeMapper.initTypes.and.returnValue(objectTypes);
+      spyOn(GGRC.Mappings, 'getMappingTypes').and.returnValue(objectTypes);
+
       result = instance._choosableObjectTypes();
       expect(result.all_objects).toBeUndefined();
     });
@@ -139,7 +117,8 @@ describe('can.Model.AssessmentTemplate', function () {
           // the groupBaz group, being empty, is expected to have been removed
         };
 
-        fakeMapper.initTypes.and.returnValue(objectTypes);
+        spyOn(GGRC.Mappings, 'getMappingTypes').and.returnValue(objectTypes);
+
         result = instance._choosableObjectTypes();
         expect(result).toEqual(expected);
       }

@@ -34,8 +34,6 @@
     tree_view_options: {
       sort_property: 'sort_index',
       attr_view: GGRC.mustache_path + '/task_groups/tree-item-attr.mustache',
-      header_view: GGRC.mustache_path + '/task_groups/tree_header.mustache',
-      footer_view: GGRC.mustache_path + '/base_objects/tree_footer.mustache',
       add_item_view: GGRC.mustache_path + '/task_groups/tree_add_item.mustache',
       mapper_attr_list: [
         {attr_title: 'Summary', attr_name: 'title'},

@@ -16,7 +16,7 @@
     mixins: [
       'ownable', 'unique_title',
       'autoStatusChangeable', 'timeboxed', 'mapping-limit',
-      'inScopeObjects'
+      'inScopeObjects', 'accessControlList'
     ],
     is_custom_attributable: true,
     isRoleable: true,

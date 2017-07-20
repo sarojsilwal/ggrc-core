@@ -13,28 +13,35 @@
 </div>
 <div class="modal-filter modal-body">
   <mapper-toolbar class="flex-box search-toolbar flex-box-multi"
-    mapper="mapper"
-    is-loading="mapper.is_loading"
-    {(filter)}="mapper.filter"
-    (submit)="mapper.onSubmit()"
+    is-loading="is_loading"
+    {(filter)}="filter"
+    (submit)="onSubmit()"
     total-objects="totalObjects"
-    {(status-filter)}="mapper.statusFilter">
+    {(status-filter)}="statusFilter"
+    {(type)}="type"
+    {after-search}="afterSearch"
+    {search-only}="true">
   </mapper-toolbar>
   <hr/>
   <mapper-results
-    class="{{#mapper.useSnapshots}}snapshot-list{{/mapper.useSnapshots}}
-      {{^mapper.afterSearch}}hidden{{/mapper.afterSearch}}"
-    base-instance="mapper.parentInstance"
-    {(is-loading)}="mapper.is_loading"
-    mapper="mapper"
-    type="mapper.type"
-    filter="mapper.filter"
-    submit-cbs="mapper.submitCbs"
+    class="{{#useSnapshots}}snapshot-list{{/useSnapshots}}
+      {{^afterSearch}}hidden{{/afterSearch}}"
+    base-instance="parentInstance"
+    {(is-loading)}="is_loading"
+    type="type"
+    filter="filter"
+    submit-cbs="submitCbs"
     {^paging.total}="totalObjects"
-    status-filter="mapper.statusFilter">
+    status-filter="statusFilter"
+    {search-only}="true"
+    {use-snapshots}="useSnapshots"
+    {new-entries}="newEntries"
+    {(after-search)}="afterSearch"
+    {(entries)}="entries"
+    {relevant}="relevant">
   </mapper-results>
   <div class="well well-small
-              {{#mapper.afterSearch}}hidden{{/mapper.afterSearch}}">
+              {{#afterSearch}}hidden{{/afterSearch}}">
     No results
   </div>
 </div>

@@ -91,12 +91,21 @@ class Converter(object):
       csv_data.extend(block_data)
     return csv_data
 
+  def _start_compute_attributes_job(self):
+    from ggrc import views
+    revision_ids = []
+    for block_converter in self.block_converters:
+      revision_ids.extend(block_converter.revision_ids)
+    if revision_ids:
+      views.start_compute_attributes(revision_ids)
+
   def import_csv(self):
     self.block_converters_from_csv()
     self.row_converters_from_csv()
     self.handle_priority_columns()
     self.import_objects()
     self.import_secondary_objects()
+    self._start_compute_attributes_job()
     self.drop_cache()
 
   def handle_priority_columns(self):

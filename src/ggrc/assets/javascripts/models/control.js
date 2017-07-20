@@ -24,8 +24,6 @@
       object_people: 'CMS.Models.ObjectPerson.stubs',
       documents: 'CMS.Models.Document.stubs',
       people: 'CMS.Models.Person.stubs',
-      categories: 'CMS.Models.ControlCategory.stubs',
-      assertions: 'CMS.Models.ControlAssertion.stubs',
       objectives: 'CMS.Models.Objective.stubs',
       directive: 'CMS.Models.Directive.stub',
       audit_objects: 'CMS.Models.AuditObject.stubs',
@@ -58,7 +56,7 @@
         {attr_title: 'Control URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'},
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'},
         {
           attr_title: 'Kind/Nature',
           attr_name: 'kind',

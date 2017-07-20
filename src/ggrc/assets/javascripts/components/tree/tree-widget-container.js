@@ -559,7 +559,7 @@
         selectedEl.addClass('item-active');
 
         $('.pin-content').control()
-          .setInstance(infoPaneOptions, selectedEl);
+          .setInstance(infoPaneOptions, selectedEl, true);
       },
       ' refreshTree': function (el, ev) {
         ev.stopPropagation();

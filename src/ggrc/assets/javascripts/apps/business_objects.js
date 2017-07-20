@@ -346,8 +346,7 @@
           },
           Assessment: {
             mapping: 'related_assessments',
-            draw_children: true,
-            footer_view: path + '/base_objects/tree_footer.mustache'
+            draw_children: true
           },
           Document: {
             mapping: 'documents',
@@ -591,7 +590,6 @@
           },
           Issue: {
             mapping: 'related_issues',
-            footer_view: path + '/base_objects/tree_footer.mustache',
             add_item_view: path + '/issues/tree_add_item.mustache'
           },
           Audit: {
@@ -679,8 +677,7 @@
           },
           Issue: {
             mapping: 'extended_related_issues_via_search',
-            draw_children: true,
-            footer_view: GGRC.mustache_path + '/base_objects/tree_footer.mustache'
+            draw_children: true
           },
           AccessGroup: {
             mapping: 'extended_related_access_groups_via_search',
@@ -728,9 +725,7 @@
           Assessment: {
             mapping: 'extended_related_assessment_via_search',
             draw_children: true,
-            add_item_view: null,
-            header_view: path + '/base_objects/tree_header.mustache',
-            footer_view: path + '/base_objects/tree_footer.mustache'
+            add_item_view: null
           },
           Risk: {
             mapping: 'extended_related_risks_via_search',

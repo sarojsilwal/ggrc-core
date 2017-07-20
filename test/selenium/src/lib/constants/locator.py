@@ -453,6 +453,11 @@ class ModalCreateNewAsmt(BaseModalCreateNew):
 
 class ModalCreateNewAsmtTmpl(BaseModalCreateNew):
   """Locators for Create new Assessment Template modals."""
+  ASSIGNEE_DROPDOWN = (
+      By.CSS_SELECTOR, 'select[can-value="instance.default_people.assessors"]')
+  ASSIGNEE_DROPDOWN_OPTION = (
+      By.CSS_SELECTOR,
+      'select[can-value="instance.default_people.assessors"] option')
 
 
 class ModalEditObject(BaseModalCreateNew):
@@ -613,7 +618,7 @@ class CommonWidgetInfo(object):
   """Common locators for Info widgets and Info panels."""
   _NOT_HIDDEN = Common.XPATH_NOT_HIDDEN
   _INFO_WIDGET_XPATH = Common.INFO_WIDGET_XPATH + _NOT_HIDDEN
-  _MAIN_HEADER_XPATH = "//div[@class='span9']" + _NOT_HIDDEN
+  _MAIN_HEADER_XPATH = "//div[contains(@class,'pane-header')]" + _NOT_HIDDEN
   _HEADERS_AND_VALUES = (_INFO_WIDGET_XPATH +
                          '//div[starts-with(./@class, "span")]//h6/..')
   HEADERS_AND_VALUES = (By.XPATH, _HEADERS_AND_VALUES)
@@ -623,7 +628,8 @@ class CommonWidgetInfo(object):
   # labels
   TITLE = (By.XPATH, _MAIN_HEADER_XPATH + "//h6")
   TITLE_ENTERED = (By.XPATH, _MAIN_HEADER_XPATH + "//h3")
-  STATE = (By.XPATH, _MAIN_HEADER_XPATH + "//span[last()]")
+  STATE = (By.XPATH, _MAIN_HEADER_XPATH +
+           "//*[contains(normalize-space(./@class), 'state-value state')]")
   # user input elements
   BUTTON_3BBS = (By.XPATH, _INFO_WIDGET_XPATH + "//*[@data-toggle='dropdown']")
 
@@ -735,22 +741,28 @@ class WidgetInfoAudit(WidgetInfoPanel):
 
 class WidgetInfoAssessment(WidgetInfoPanel):
   """Locators for Assessment Info widgets."""
+  # pylint: disable=invalid-name
   WIDGET = Common.INFO_WIDGET
   TOGGLE = ' [class*="fa-caret"]'
   # Base
   CAS_HEADERS_AND_VALUES = (By.CSS_SELECTOR,
                             WIDGET + " auto-save-form .flex-size-1")
   CAS_CHECKBOXES = (By.CSS_SELECTOR, '[class*="wrapper"] [type="checkbox"]')
-  MAPPED_OBJECTS_TITLES_AND_DESCRIPTIONS = (By.CSS_SELECTOR,
-                                            WIDGET + Common.TREE_ITEM)
+  MAPPED_OBJECTS_TITLES_AND_DESCRIPTIONS = (
+      By.CSS_SELECTOR, WIDGET + " .mapped-objects__item-body")
+  MAPPED_OBJECT_TITLE = (By.CSS_SELECTOR, ".title")
+  MAPPED_OBJECT_DESCRIPTION = (By.CSS_SELECTOR, ".description")
   # Assessment Attributes tab
   # People section
   PEOPLE_HEADERS_AND_VALUES = (By.CSS_SELECTOR,
                                "assessment-people .editable-people-group")
   # Code section
-  _CODE = WIDGET + ' [title-text="Code"]'
-  BUTTON_CODE_TOGGLE = (By.CSS_SELECTOR, _CODE + TOGGLE)
-  CODE_HEADER_AND_VALUE = (By.CSS_SELECTOR, _CODE + " .label-list>li")
+  _CODE = "assessment-inline-item[prop-name='slug'] "
+  CODE_CSS = (By.CSS_SELECTOR, _CODE)
+  CODE_HEADER_CSS = (By.CSS_SELECTOR, _CODE + " .info-pane__section-title")
+  CODE_VALUE_CSS = (By.CSS_SELECTOR, _CODE + " .inline__content-wrapper")
+  # comments section
+  COMMENTS_CSS = (By.CSS_SELECTOR, ".assessment-comments")
 
 
 class WidgetInfoAssessmentTemplate(WidgetInfoPanel):
@@ -891,7 +903,7 @@ class TreeView(object):
   # common
   _WIDGET_NOT_HIDDEN_CSS = " .widget:not(.hidden) "
   ITEMS = _WIDGET_NOT_HIDDEN_CSS + " .tree-item-element"
-  HEADER = Common.TREE_HEADER
+  HEADER = _WIDGET_NOT_HIDDEN_CSS + Common.TREE_HEADER
   ITEM_LOADING = (By.CSS_SELECTOR, " .tree-item-placeholder")
   ITEM_EXPAND_BUTTON = " tree-item-actions"
   SPINNER = (By.CSS_SELECTOR, " .tree-spinner")
@@ -904,6 +916,12 @@ class TreeView(object):
   BUTTON_MAP = "{} " + Common.TREE_LIST + " .map-button"
   ITEM_DROPDOWN_BUTTON = (By.CSS_SELECTOR, " ".join(
       (_WIDGET_NOT_HIDDEN_CSS, ITEM_EXPAND_BUTTON)))
+
+
+class TreeViewItem(object):
+  """Locators for Tree View Item element"""
+  CELL = (By.CSS_SELECTOR,
+          "div[class*='attr']:not(.attr-content):not(.selectable-attrs)")
 
 
 class AdminTreeView(object):
@@ -1092,3 +1110,21 @@ class CustomAttributesItemContent(AdminCustomAttributes):
   EDIT_BTN = (By.CSS_SELECTOR, CONTENT_OPEN + " " + Common.TREE_LIST)
   ADD_BTN = (By.CSS_SELECTOR, CONTENT_OPEN + " .add-item .btn")
   TREE_SPINNER = (By.CSS_SELECTOR, ".tree-spinner")
+
+
+class CommentsPanel(object):
+  """Locators for comments' panel."""
+  # _form = ".comment-add-form"
+  HEADER_LBL_CSS = (By.CSS_SELECTOR, ".info-pane__section-title")
+  INPUT_TXT_CSS = (By.CSS_SELECTOR, ".ql-editor")
+  CB_SEND_CSS = (By.CSS_SELECTOR, ".comment-add-form__toolbar-item")
+  CB_SPINNER_CSS = (By.CSS_SELECTOR, ".spinner")
+  ADD_BTN_CSS = (By.CSS_SELECTOR, "comment-add-button")
+  ITEMS_CSS = (By.CSS_SELECTOR, "comment-list-item")
+
+
+class CommentItem(object):
+  """Locators for single item in comments' panel."""
+  AUTHOR_CSS = (By.CSS_SELECTOR, ".person-holder")
+  DATETIME_CSS = (By.CSS_SELECTOR, ".comment-object-item__author_info")
+  CONTENT_CSS = (By.CSS_SELECTOR, ".comment-object-item__text")

@@ -336,3 +336,30 @@ class TestWorkflowObjectsImport(TestCase):
     ]))
     self.assertEqual(1, resp[0]['ignored'])
     self.assertIsNone(Workflow.query.filter(Workflow.slug == slug).first())
+
+  @ddt.data(("", errors.MISSING_VALUE_ERROR), ("--", errors.WRONG_VALUE_ERROR))
+  @ddt.unpack
+  def test_create_required_flag_error(self, data, msg):
+    """Test create wf with empty or invalid Needed Verification flag"""
+    slug = "SomeCode"
+    with factories.single_commit():
+      person = factories.PersonFactory(email="test@email.py")
+    resp = self.import_data(collections.OrderedDict([
+        ("object_type", "Workflow"),
+        ("code", slug),
+        ("title", "SomeTitle"),
+        ("Frequency", "One time"),
+        ("force real-time email updates", "no"),
+        ("Manager", person.email),
+        ("Need Verification", data),
+    ]))
+    data = {
+        "Workflow": {
+            "row_errors": {
+                msg.format(line=3, column_name="Need Verification")
+            }
+        }
+    }
+    self.assertEqual(1, resp[0]['ignored'])
+    self._check_csv_response(resp, data)
+    self.assertIsNone(Workflow.query.filter(Workflow.slug == slug).first())

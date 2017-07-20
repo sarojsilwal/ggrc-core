@@ -198,6 +198,12 @@ tree-item {
             margin-bottom: 0;
           }
         }
+        .with-comma::after {
+          content: ', ';
+        }
+        .with-comma:last-child::after {
+          content: '';
+        }
       }
     }
   }

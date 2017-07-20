@@ -105,15 +105,15 @@ class TestCustomAttributeImportExport(TestCase):
     }
 
     expected_errors = {
-        "Line 6: Field man CH is required. The line will be ignored.",
-        "Line 9: Field man select is required. The line will be ignored.",
-        "Line 10: Field man select is required. The line will be ignored.",
-        "Line 12: Field man CH is required. The line will be ignored.",
-        "Line 16: Field man Date is required. The line will be ignored.",
-        "Line 18: Field man RT is required. The line will be ignored.",
-        "Line 20: Field man text is required. The line will be ignored.",
-        "Line 21: Field man person is required. The line will be ignored.",
-        "Line 28: Field Title is required. The line will be ignored."
+        "Line 6: Field 'man CH' is required. The line will be ignored.",
+        "Line 9: Field 'man select' is required. The line will be ignored.",
+        "Line 10: Field 'man select' is required. The line will be ignored.",
+        "Line 12: Field 'man CH' is required. The line will be ignored.",
+        "Line 16: Field 'man Date' is required. The line will be ignored.",
+        "Line 18: Field 'man RT' is required. The line will be ignored.",
+        "Line 20: Field 'man text' is required. The line will be ignored.",
+        "Line 21: Field 'man person' is required. The line will be ignored.",
+        "Line 28: Field 'Title' is required. The line will be ignored."
     }
 
     self.assertEqual(expected_warnings, set(response["row_warnings"]))

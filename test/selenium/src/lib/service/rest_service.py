@@ -8,7 +8,7 @@ import json
 from requests import exceptions
 
 from lib import environment, factory
-from lib.constants import url, objects, templates
+from lib.constants import url, objects, templates, messages
 from lib.entities.entities_factory import ObjectPersonsFactory
 from lib.service.rest.client import RestClient
 from lib.utils import string_utils
@@ -85,9 +85,9 @@ class BaseRestService(object):
       return dict(resp.items() + get_extra_items(resp).items())
     else:
       resp_code, resp_message = resp[0]
-      print "Response_code: {code}, Response_message: {message}".format(
-          code=resp_code, message=resp_message)
-      raise exceptions.ContentDecodingError
+      raise exceptions.ContentDecodingError(
+          messages.ExceptionsMessages.err_server_response.
+          format(resp_code, resp_message))
 
   @staticmethod
   def set_obj_attrs(attrs, obj, **kwargs):
@@ -178,6 +178,19 @@ class AssessmentsService(BaseRestService):
   def __init__(self):
     super(AssessmentsService, self).__init__(url.ASSESSMENTS)
 
+  def create_objs(self, count, factory_params=None, **attrs_for_template):
+    """Create new Assessments and make default relationships of Persons:
+    'Creator', 'Assessor' to them via REST API and return list of created
+    objects with filtered attributes.
+    """
+    objs = BaseRestService(url.ASSESSMENTS).create_objs(
+        count, factory_params=None, **attrs_for_template)
+    # add Default Person as 'Assessor', 'Creator' to Assessments
+    RelationshipsService().map_objs(
+        src_obj=ObjectPersonsFactory().default(), dest_objs=objs,
+        attrs={"AssigneeType": "Creator,Assessor"})
+    return objs
+
 
 class IssuesService(BaseRestService):
   """Service for working with Issues entities."""
@@ -197,13 +210,13 @@ class RelationshipsService(HelpRestService):
   def __init__(self):
     super(RelationshipsService, self).__init__(url.RELATIONSHIPS)
 
-  def map_objs(self, src_obj, dest_objs):
+  def map_objs(self, src_obj, dest_objs, **attrs_for_template):
     """Create relationship from source to destination objects and
     return created.
     """
     return [self.client.create_object(
         type=objects.get_singular(self.endpoint), source=src_obj.__dict__,
-        destination=dest_obj.__dict__) for
+        destination=dest_obj.__dict__, **attrs_for_template) for
         dest_obj in string_utils.convert_to_list(dest_objs)]
 
 

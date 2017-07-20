@@ -49,8 +49,8 @@ class TestExportSnapshots(TestCase):
         elif cav.custom_attribute.attribute_type == "Date":
           parts = cav.attribute_value.split("-")
           return u"{}/{}/{}".format(parts[1], parts[2], parts[0])
-        else:
-          return cav.attribute_value
+
+        return cav.attribute_value
     return u""
 
   @staticmethod
@@ -115,6 +115,8 @@ class TestExportSnapshots(TestCase):
             "Evidence": u"\n".join(c.slug for c in control.document_evidence),
             "Assertions": u"\n".join(c.name for c in control.assertions),
             "Categories": u"\n".join(c.name for c in control.categories),
+            # Computed attributes
+            "Last Assessment Date": u"",
         }
         for snapshot, control in zip(snapshots, controls)
     }
@@ -211,6 +213,8 @@ class TestExportSnapshots(TestCase):
             "Type/Means": u"",
             # Special snapshot export fields
             "Audit": audit.slug,
+            # Computed attributes
+            "Last Assessment Date": u"",
 
             # Custom attributes
             "RT": u"",

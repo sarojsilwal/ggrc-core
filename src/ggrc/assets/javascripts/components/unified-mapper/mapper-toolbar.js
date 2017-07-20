@@ -16,12 +16,13 @@
       statusFilter: '',
       dropdown_options: [],
       statuses: [],
-      mapper: {},
       isLoading: false,
       totalObjects: 0,
       objectsPlural: false,
       showStatusFilter: false,
       displayPrefs: null,
+      type: '',
+      afterSearch: false,
       init: function () {
         var self = this;
         CMS.Models.DisplayPrefs.getSingleton().then(function (displayPrefs) {
@@ -42,7 +43,7 @@
         this.dispatch('submit');
       },
       getModelName: function () {
-        var Model = CMS.Models[this.attr('mapper.type')];
+        var Model = CMS.Models[this.attr('type')];
         return Model.model_singular;
       },
       setStatusFilter: function () {
@@ -73,7 +74,7 @@
 
           this.attr('dropdown_options', dropdownOptions);
           this.attr('statusFilter', GGRC.Utils.State
-            .statusFilter(statuses, '', this.attr('mapper.type')));
+            .statusFilter(statuses, '', this.attr('type')));
 
           this.attr('statuses', statuses);
         } else {
@@ -93,12 +94,12 @@
       '{viewModel} totalObjects': function (scope, ev, totalObjects) {
         this.viewModel.attr('objectsPlural', totalObjects > 1);
       },
-      '{viewModel.mapper} afterSearch': function (scope, ev, afterSearch) {
+      '{viewModel} afterSearch': function (scope, ev, afterSearch) {
         if (!afterSearch) {
           this.viewModel.attr('totalObjects', 0);
         }
       },
-      '{viewModel.mapper} type': function () {
+      '{viewModel} type': function () {
         this.viewModel.setStatusFilter();
       },
       'multiselect-dropdown multiselect:closed': function (el, ev, selected) {
@@ -108,7 +109,7 @@
         this.viewModel.attr('statuses', selectedStatuses);
 
         this.viewModel.attr('statusFilter', GGRC.Utils.State.statusFilter(
-          selectedStatuses, '', this.viewModel.attr('mapper.type')));
+          selectedStatuses, '', this.viewModel.attr('type')));
         ev.stopPropagation();
       }
     }

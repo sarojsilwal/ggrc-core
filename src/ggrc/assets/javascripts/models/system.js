@@ -51,7 +51,7 @@ can.Model.Cacheable('CMS.Models.SystemOrProcess', {
         attr_sort_field: 'network_zone'
       },
       {attr_title: 'Effective Date', attr_name: 'start_date'},
-      {attr_title: 'Stop Date', attr_name: 'end_date'},
+      {attr_title: 'Last Deprecated Date', attr_name: 'end_date'},
       {attr_title: 'URL', attr_name: 'url'},
       {attr_title: 'Reference URL', attr_name: 'reference_url'}
     ]),
@@ -118,7 +118,6 @@ CMS.Models.SystemOrProcess('CMS.Models.System', {
     this.tree_view_options = $.extend({},
       CMS.Models.SystemOrProcess.tree_view_options, {
         // systems is a special case; can be imported to programs
-        footer_view: GGRC.mustache_path + '/base_objects/tree_footer.mustache',
         add_item_view: GGRC.mustache_path +
         (GGRC.infer_object_type(GGRC.page_object) === CMS.Models.Program ?
           '/snapshots/tree_add_item.mustache' :

@@ -22,7 +22,7 @@
     {{/if}}
   {{/if}}
   {{#unless isInProgress}}
-    {{#instance._undo.0}}
+    {{#instance.previousStatus}}
         <button class="btn btn-small btn-link object-state-toolbar__item"
                 {{#if isDisabled}}disabled{{/if}}
                 ($click)="changeState('In Progress', true)">Undo

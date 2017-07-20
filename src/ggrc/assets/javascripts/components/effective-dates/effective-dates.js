@@ -20,7 +20,7 @@
         required: false
       },
       configEndDate: {
-        label: 'Stop Date',
+        label: 'Last Deprecated Date',
         helpText: 'Enter the date this object stops being effective.',
         required: false
       }

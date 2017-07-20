@@ -1,6 +1,8 @@
 # Copyright (C) 2017 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
+"""Module for CSV column definition tests."""
+
 import ddt
 
 from ggrc import converters
@@ -13,13 +15,13 @@ from ggrc.utils.rules import get_mapping_rules, get_unmapping_rules
 from ggrc.utils import title_from_camelcase
 from ggrc_risks import models as r_models
 from ggrc_risk_assessments import models as ra_models
-from ggrc_workflows import models as wf_models
 from integration.ggrc import TestCase
 from integration.ggrc.models import factories
 from integration.ggrc.generator import ObjectGenerator
 
 
 def get_mapping_names(class_name):
+  """Get mapping column names."""
   mapping_rules = get_mapping_rules().get(class_name)
   if mapping_rules is not None:
     pretty_mapping_rules = (title_from_camelcase(r) for r in mapping_rules)
@@ -30,6 +32,7 @@ def get_mapping_names(class_name):
 
 
 def get_unmapping_names(class_name):
+  """Get unmapping column names."""
   unmapping_rules = get_unmapping_rules().get(class_name)
   if unmapping_rules is not None:
     pretty_unmapping_rules = (title_from_camelcase(r) for r in unmapping_rules)
@@ -62,12 +65,14 @@ class TestACLAttributeDefinitions(TestCase):
 
 
 class TestCustomAttributesDefinitions(TestCase):
+  """Test for custom attribute definition columns."""
 
   def setUp(self):
     super(TestCustomAttributesDefinitions, self).setUp()
     self.generator = ObjectGenerator()
 
   def test_policy_definitions(self):
+    """Test custom attribute definitions on Policy model."""
     self.generator.generate_custom_attribute("policy", title="My Attribute")
     self.generator.generate_custom_attribute(
         "policy", title="Mandatory Attribute", mandatory=True)
@@ -101,7 +106,7 @@ class TestCustomAttributesDefinitions(TestCase):
     self.assertTrue(vals["Mandatory Attribute"]["mandatory"])
 
   def test_program_definitions(self):
-    """ test custom attribute headers for Program """
+    """ test custom attribute headers for Program."""
 
     self.generator.generate_custom_attribute(
         "program",
@@ -150,10 +155,10 @@ class TestCustomAttributesDefinitions(TestCase):
     self.assertTrue(vals["Choose"]["mandatory"])
 
 
+@ddt.ddt
 class TestGetObjectColumnDefinitions(TestCase):
 
-  """
-  Test default column difinitions for all objcts
+  """Test default column difinitions for all objects.
 
   order of these test functions is the same as the objects in LHN
   """
@@ -178,7 +183,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     pass
 
   def _test_definition_names(self, obj_class, names, has_mappings=True):
-    """ Test name definitions for one class
+    """Test name definitions for one class
 
     This function checks if names returned by get_object_column_definitions
     match provided list of names with the appropriate mapping names fro that
@@ -288,7 +293,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self.assertEqual(verification_errors, [])
 
   def test_program_definitions(self):
-    """ test default headers for Program """
+    """Test default headers for Program."""
     names = {
         "Title",
         "Description",
@@ -323,7 +328,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self.assertEqual(vals["Manager"]["type"], "user_role")
 
   def test_audit_definitions(self):
-    """ test default headers for Audit """
+    """Test default headers for Audit."""
     names = {
         "Program",
         "Code",
@@ -405,6 +410,7 @@ class TestGetObjectColumnDefinitions(TestCase):
         "Assignees",
         "Verifiers",
         "Assessment URL",
+        "Assessment Type",
         "Reference URL",
         "Evidence",
         "Url",
@@ -441,7 +447,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self._test_single_object(models.Assessment, names, expected_fields)
 
   def test_issue_definitions(self):
-    """ test default headers for Issue """
+    """Test default headers for Issue."""
     names = {
         "Title",
         "Description",
@@ -477,26 +483,8 @@ class TestGetObjectColumnDefinitions(TestCase):
     }
     self._test_single_object(models.Issue, names, expected_fields)
 
-  def test_regulation_definitions(self):
-    """ test default headers for Regulation """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Regulation URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Regulation, names, self.COMMON_EXPECTED)
-
   def test_policy_definitions(self):
-    """ test default headers for Policy """
+    """Test default headers for Policy."""
     names = {
         "Title",
         "Description",
@@ -514,44 +502,8 @@ class TestGetObjectColumnDefinitions(TestCase):
     }
     self._test_single_object(models.Policy, names, self.COMMON_EXPECTED)
 
-  def test_standard_definitions(self):
-    """ test default headers for Standard """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Standard URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Standard, names, self.COMMON_EXPECTED)
-
-  def test_contract_definitions(self):
-    """ test default headers for Contract """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Contract URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Contract, names, self.COMMON_EXPECTED)
-
   def test_clause_definitions(self):
-    """ test default headers for Clause """
+    """Test default headers for Clause."""
     names = {
         "Title",
         "Text of Clause",
@@ -569,7 +521,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self._test_single_object(models.Clause, names, self.COMMON_EXPECTED)
 
   def test_section_definitions(self):
-    """ test default headers for Section """
+    """Test default headers for Section."""
     names = {
         "Title",
         "Text of Section",
@@ -586,7 +538,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self._test_single_object(models.Section, names, self.COMMON_EXPECTED)
 
   def test_control_definitions(self):
-    """ test default headers for Control """
+    """Test default headers for Control."""
     names = {
         "Title",
         "Description",
@@ -606,6 +558,7 @@ class TestGetObjectColumnDefinitions(TestCase):
         "Assertions",
         "Categories",
         "State",
+        "Last Assessment Date",
         "Review State",
         "Evidence",
         "Delete",
@@ -613,7 +566,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self._test_single_object(models.Control, names, self.COMMON_EXPECTED)
 
   def test_objective_definitions(self):
-    """ test default headers for Objective """
+    """Test default headers for Objective."""
     names = {
         "Title",
         "Description",
@@ -621,6 +574,7 @@ class TestGetObjectColumnDefinitions(TestCase):
         "Admin",
         "Objective URL",
         "Reference URL",
+        "Last Assessment Date",
         "Code",
         "State",
         "Review State",
@@ -629,7 +583,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self._test_single_object(models.Objective, names, self.COMMON_EXPECTED)
 
   def test_person_definitions(self):
-    """ test default headers for Person """
+    """Test default headers for Person."""
     names = {
         "Name",
         "Email",
@@ -646,44 +600,8 @@ class TestGetObjectColumnDefinitions(TestCase):
     }
     self._test_single_object(models.Person, names, expected_fields)
 
-  def test_org_group_definitions(self):
-    """ test default headers for OrgGroup """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Org Group URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.OrgGroup, names, self.COMMON_EXPECTED)
-
-  def test_vendor_definitions(self):
-    """ test default headers for Vendor """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Vendor URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Vendor, names, self.COMMON_EXPECTED)
-
   def test_system_definitions(self):
-    """ test default headers for System """
+    """Test default headers for System."""
     names = {
         "Title",
         "Description",
@@ -702,7 +620,7 @@ class TestGetObjectColumnDefinitions(TestCase):
     self._test_single_object(models.System, names, self.COMMON_EXPECTED)
 
   def test_process_definitions(self):
-    """ test default headers for Process """
+    """Test default headers for Process."""
     names = {
         "Title",
         "Description",
@@ -720,44 +638,8 @@ class TestGetObjectColumnDefinitions(TestCase):
     }
     self._test_single_object(models.Process, names, self.COMMON_EXPECTED)
 
-  def test_data_asset_definitions(self):
-    """ test default headers for DataAsset """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Data Asset URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.DataAsset, names, self.COMMON_EXPECTED)
-
-  def test_access_group_definitions(self):
-    """ test default headers for AccessGroup """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Access Group URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.AccessGroup, names, self.COMMON_EXPECTED)
-
   def test_product_definitions(self):
-    """ test default headers for Product """
+    """Test default headers for Product."""
     names = {
         "Title",
         "Description",
@@ -775,63 +657,8 @@ class TestGetObjectColumnDefinitions(TestCase):
     }
     self._test_single_object(models.Product, names, self.COMMON_EXPECTED)
 
-  def test_project_definitions(self):
-    """ test default headers for Project """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Project URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Project, names, self.COMMON_EXPECTED)
-
-  def test_facility_definitions(self):
-    """ test default headers for Facility """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Facility URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Facility, names, self.COMMON_EXPECTED)
-
-  def test_market_definitions(self):
-    """ test default headers for Market """
-    names = {
-        "Title",
-        "Description",
-        "Notes",
-        "Admin",
-        "Market URL",
-        "Reference URL",
-        "Code",
-        "Effective Date",
-        "Last Deprecated Date",
-        "State",
-        "Review State",
-        "Delete",
-    }
-    self._test_single_object(models.Market, names, self.COMMON_EXPECTED)
-
   def test_risk_definitions(self):
     """Test default headers for Risk."""
-
     names = {
         "Code",
         "Delete",
@@ -860,116 +687,39 @@ class TestGetObjectColumnDefinitions(TestCase):
     }
     self._test_single_object(r_models.Risk, names, expected_fields)
 
-
-class TestGetWorkflowObjectColumnDefinitions(TestCase):
-  """Test default column difinitions for workflow objcts.
-  """
-
-  @classmethod
-  def setUpClass(cls):
-    TestCase.clear_data()
-
-  def setUp(self):
-    pass
-
-  def test_workflow_definitions(self):
-    """ test default headers for Workflow """
-    definitions = get_object_column_definitions(wf_models.Workflow)
-    display_names = {val["display_name"] for val in definitions.itervalues()}
-    expected_names = {
+  @ddt.data(
+      models.AccessGroup,
+      models.Contract,
+      models.DataAsset,
+      models.Facility,
+      models.Market,
+      models.OrgGroup,
+      models.Project,
+      models.Regulation,
+      models.Standard,
+      models.Vendor,
+  )
+  def test_common_model_definitions(self, model):
+    """Test common definition names"""
+    names = {
         "Title",
         "Description",
-        "Custom email message",
-        "Manager",
-        "Member",
-        "Frequency",
-        "Force real-time email updates",
+        "Notes",
+        "Admin",
+        "Reference URL",
         "Code",
-        "Delete",
-        "Need Verification",
-    }
-    self.assertEqual(expected_names, display_names)
-    vals = {val["display_name"]: val for val in definitions.itervalues()}
-    self.assertTrue(vals["Title"]["mandatory"])
-    self.assertTrue(vals["Manager"]["mandatory"])
-    self.assertTrue(vals["Frequency"]["mandatory"])
-    self.assertIn("type", vals["Manager"])
-    self.assertIn("type", vals["Member"])
-    self.assertEqual(vals["Manager"]["type"], "user_role")
-    self.assertEqual(vals["Member"]["type"], "user_role")
-
-  def test_task_group_definitions(self):
-    """ test default headers for Task Group """
-    definitions = get_object_column_definitions(wf_models.TaskGroup)
-    display_names = {val["display_name"] for val in definitions.itervalues()}
-    expected_names = {
-        "Summary",
-        "Details",
-        "Assignee",
-        "Code",
-        "Workflow",
-        "Objects",
-        "Delete",
-    }
-    self.assertEqual(expected_names, display_names)
-    vals = {val["display_name"]: val for val in definitions.itervalues()}
-    self.assertTrue(vals["Summary"]["mandatory"])
-    self.assertTrue(vals["Assignee"]["mandatory"])
-
-  def test_task_group_task_definitions(self):
-    """ test default headers for Task Group Task """
-    definitions = get_object_column_definitions(wf_models.TaskGroupTask)
-    display_names = {val["display_name"] for val in definitions.itervalues()}
-    expected_names = {
-        "Summary",
-        "Task Type",
-        "Assignee",
-        "Task Description",
-        "Start",
-        "End",
-        "Task Group",
-        "Code",
-        "Delete",
-    }
-    self.assertEqual(expected_names, display_names)
-    vals = {val["display_name"]: val for val in definitions.itervalues()}
-    self.assertTrue(vals["Summary"]["mandatory"])
-    self.assertTrue(vals["Assignee"]["mandatory"])
-
-  def test_cycle_task_definitions(self):
-    """ test default headers for Cycle Task Group Object Task """
-    definitions = get_object_column_definitions(
-        wf_models.CycleTaskGroupObjectTask)
-    mapping_names = get_mapping_names(
-        wf_models.CycleTaskGroupObjectTask.__name__)
-    unmapping_names = get_unmapping_names(
-        wf_models.CycleTaskGroupObjectTask.__name__)
-    display_names = {val["display_name"] for val in definitions.itervalues()}
-    element_names = {
-        "Code",
-        "Cycle",
-        "Summary",
-        "Task Type",
-        "Assignee",
-        "Task Details",
-        "Start Date",
-        "Due Date",
-        "Actual Verified Date",
-        "Actual Finish Date",
-        "Task Group",
+        "Effective Date",
+        "Last Deprecated Date",
         "State",
+        "Review State",
         "Delete",
     }
-    expected_names = element_names.union(mapping_names).union(unmapping_names)
-    self.assertEqual(expected_names, display_names)
-    vals = {val["display_name"]: val for val in definitions.itervalues()}
-    self.assertTrue(vals["Summary"]["mandatory"])
-    self.assertTrue(vals["Assignee"]["mandatory"])
+    names.add("{} URL".format(model._inflector.title_singular.title()))
+    self._test_single_object(model, names, self.COMMON_EXPECTED)
 
 
-class TestGetRiskAssessmentObjectColumnDefinitions(TestCase):
-  """Test default column difinitions for risk assessment objcts.
-  """
+class TestRiskAssessmentColumnDefinitions(TestCase):
+  """Test default column difinitions for risk assessment objcts."""
 
   @classmethod
   def setUpClass(cls):
@@ -978,8 +728,8 @@ class TestGetRiskAssessmentObjectColumnDefinitions(TestCase):
   def setUp(self):
     pass
 
-  def test_risk_assessemnt_definitions(self):
-    """ test default headers for Workflow """
+  def test_risk_assessemnt(self):
+    """Test default headers for Risk Assessment."""
     definitions = get_object_column_definitions(ra_models.RiskAssessment)
     display_names = {val["display_name"] for val in definitions.itervalues()}
     expected_names = {

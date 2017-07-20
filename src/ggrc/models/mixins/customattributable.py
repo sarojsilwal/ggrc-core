@@ -38,6 +38,8 @@ class CustomAttributable(object):
   _include_links = ['custom_attribute_values', 'custom_attribute_definitions']
   _update_raw = ['custom_attribute_values']
 
+  _evidence_found = None
+
   @declared_attr
   def custom_attribute_definitions(cls):  # pylint: disable=no-self-argument
     """Load custom attribute definitions"""
@@ -471,7 +473,12 @@ class CustomAttributable(object):
 
   @builder.simple_property
   def preconditions_failed(self):
-    """Returns True if any mandatory CAV, comment or evidence is missing."""
+    """Returns True if any mandatory CAV, comment or evidence is missing.
+
+    Note: return value may be incorrect if evidence count is changed
+    after the first property calculation (see check_mandatory_evidence
+    function).
+    """
     values_map = {
         cav.custom_attribute_id or cav.custom_attribute.id: cav
         for cav in self.custom_attribute_values
@@ -483,5 +490,37 @@ class CustomAttributable(object):
         if not cav or not cav.attribute_value:
           return True
 
-    return any(cav.preconditions_failed
-               for cav in self.custom_attribute_values)
+    return any(c.preconditions_failed
+               for c in self.custom_attribute_values)
+
+  def check_mandatory_evidence(self):
+    """Check presence of mandatory evidence.
+
+    Note:  mandatory evidence precondition is checked only once.
+    Any additional changes to evidences after the first checking
+    of the precondition will cause incorrect result of the function.
+    """
+    from ggrc.models.object_document import Documentable
+    if isinstance(self, Documentable):
+      # Note: this is a suboptimal implementation of mandatory evidence check;
+      # it should be refactored once Evicence-CA mapping is introduced
+      def evidence_required(cav):
+        """Return True if an evidence is required for this `cav`."""
+        flags = (cav._multi_choice_options_to_flags(cav.custom_attribute)
+                 .get(cav.attribute_value))
+        return flags and flags.evidence_required
+
+      if self._evidence_found is None:
+        self._evidence_found = (len(self.document_evidence) >=
+                                len([cav
+                                     for cav in self.custom_attribute_values
+                                     if evidence_required(cav)]))
+
+      if not self._evidence_found:
+        return ["evidence"]
+
+      return []
+
+  def invalidate_evidence_found(self):
+    """Invalidate the cached value"""
+    self._evidence_found = None

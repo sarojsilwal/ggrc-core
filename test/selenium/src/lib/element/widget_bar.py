@@ -12,18 +12,18 @@ from lib.utils import selenium_utils
 class Tab(base.Tab):
   "Tab base elements."
   # pylint: disable=too-few-public-methods
-  def __init__(self, driver, element_locator):
+  def __init__(self, driver, _locator_or_element):
     """
     Args: driver (base.CustomDriver
     """
-    super(Tab, self).__init__(driver, element_locator)
+    super(Tab, self).__init__(driver, _locator_or_element)
     self.member_count = None
     self._set_member_count()
 
   def _set_member_count(self):
     "Select member count."
     widget_title = selenium_utils.get_when_visible(
-        self._driver, self._locator).text
+        self._driver, self.locator_or_element).text
     if "(" not in widget_title:
       self.member_count = int(widget_title)
     else:

@@ -381,43 +381,56 @@
       return _buildSubTreeCountMap(models, relevant, filter)
         .then(function (result) {
           var countMap = result.countsMap;
-          var reqParams;
+          var dfds;
+          var mappedDfd;
+          var resultDfd;
 
           loadedModels = Object.keys(countMap);
           showMore = result.showMore;
 
-          reqParams = loadedModels.map(function (model) {
+          dfds = loadedModels.map(function (model) {
             var subTreeFields = getSubTreeFields(type, model);
             var pageInfo = {
               filter: filter
             };
+            var params;
 
             if (countMap[model]) {
               pageInfo.current = 1;
               pageInfo.pageSize = countMap[model];
             }
-            return QueryAPI.buildParam(
+
+            params = QueryAPI.buildParam(
               model,
               pageInfo,
               relevant,
               subTreeFields);
+
+            if ((SnapshotUtils.isSnapshotParent(relevant.type) ||
+              SnapshotUtils.isInScopeModel(relevant.type)) &&
+              SnapshotUtils.isSnapshotModel(params.object_name)) {
+              params = SnapshotUtils.transformQuery(params);
+            }
+
+            return QueryAPI.batchRequests(params);
           });
 
-          if (SnapshotUtils.isSnapshotParent(relevant.type) ||
-            SnapshotUtils.isInScopeModel(relevant.type)) {
-            reqParams = reqParams.map(function (item) {
-              if (SnapshotUtils.isSnapshotModel(item.object_name)) {
-                item = SnapshotUtils.transformQuery(item);
-              }
-              return item;
+          resultDfd = can.when.apply(can, dfds).promise();
+
+          if (!CurrentPage.related.initialized) {
+            mappedDfd = CurrentPage.initMappedInstances();
+
+            return can.when(mappedDfd, dfds).then(function () {
+              return resultDfd;
             });
           }
 
-          return QueryAPI.makeRequest({data: reqParams});
+          return resultDfd;
         })
-        .then(function (response) {
+        .then(function () {
           var directlyRelated = [];
           var notRelated = [];
+          var response = can.makeArray(arguments);
 
           loadedModels.forEach(function (modelName, index) {
             var values;

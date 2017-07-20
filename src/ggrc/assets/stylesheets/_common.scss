@@ -316,6 +316,9 @@ select.input-block-level {
   label {
     color: $red;
   }
+  select {
+    border: 1px solid $red;
+  }
   .help-inline {
     margin: -8px 0 8px 0;
     display: block;

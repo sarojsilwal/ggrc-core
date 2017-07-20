@@ -38,7 +38,7 @@
         {attr_title: 'Org Group URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ])
     },
     links_to: {
@@ -99,7 +99,7 @@
         {attr_title: 'Project URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view: GGRC.mustache_path + '/base_objects/tree_add_item.mustache'
     },
@@ -161,7 +161,7 @@
         {attr_title: 'Facility URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view:
         GGRC.mustache_path + '/base_objects/tree_add_item.mustache'
@@ -287,7 +287,7 @@
         {attr_title: 'Data Asset URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view:
         GGRC.mustache_path + '/base_objects/tree_add_item.mustache'
@@ -349,7 +349,7 @@
         {attr_title: 'Access Group URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view:
         GGRC.mustache_path + '/base_objects/tree_add_item.mustache'
@@ -411,7 +411,7 @@
         {attr_title: 'Market URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view: GGRC.mustache_path + '/base_objects/tree_add_item.mustache'
     },
@@ -472,7 +472,7 @@
         {attr_title: 'Vendor URL', attr_name: 'url'},
         {attr_title: 'Reference URL', attr_name: 'reference_url'},
         {attr_title: 'Effective Date', attr_name: 'start_date'},
-        {attr_title: 'Stop Date', attr_name: 'end_date'}
+        {attr_title: 'Last Deprecated Date', attr_name: 'end_date'}
       ]),
       add_item_view:
         GGRC.mustache_path + '/base_objects/tree_add_item.mustache'

@@ -65,12 +65,12 @@
       isInReview: function () {
         return this.attr('instance.status') === 'Ready for Review';
       },
-      changeState: function (newState, undo) {
+      changeState: function (newState, isUndo) {
         newState = newState || this.attr('updateState');
         this.dispatch({
           type: 'onStateChange',
           state: newState,
-          undo: undo
+          undo: isUndo
         });
       }
     }

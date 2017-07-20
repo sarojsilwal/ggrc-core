@@ -63,7 +63,6 @@ dashboard-js-files:
   - plugins/tooltip.js
   - plugins/popover.js
   - plugins/popover_template.js
-  - client_record_replay.js
   - mustache_helper.js
   - generated/ggrc_filter_query_parser.js
   # Models
@@ -84,8 +83,6 @@ dashboard-js-files:
   - models/mappers/search-list-loader.js
   - models/mappers/reifying-list-loader.js
   - models/mappers/tree-base-loader.js
-  - models/mappers/tree-page-loader.js
-  - models/mappers/sub-tree-loader.js
   - models/mappers/mapper-helpers.js
   - models/mappers/mappings.js
   - models/mappers/mappings-ggrc.js
@@ -118,6 +115,7 @@ dashboard-js-files:
   - models/join_models.js
   # ViewModels
   - components/view-models/advanced-search-container-vm.js
+  - components/view-models/object-operations-base-vm.js
   - components/view-models/tree-item-base-vm.js
   - components/view-models/tree-people-base-vm.js
   - components/base-objects/pagination.js
@@ -137,7 +135,6 @@ dashboard-js-files:
   - controllers/tree/tree-view.js
   - controllers/tree/tree-view-node.js
   - controllers/tree/list_view_controller.js
-  - controllers/tree/tree_filter_controller.js
   - controllers/unmap_modal_controller.js
   - controllers/info_pin_controller.js
   - controllers/automapper_controller.js
@@ -235,7 +232,6 @@ dashboard-js-files:
   - components/object-mapper/object-mapper.js
   - components/object-generator/object-generator.js
   - components/object-search/object-search.js
-  - components/unified-mapper/mapper-model.js
   - components/unified-mapper/mapper-toolbar.js
   - components/unified-mapper/mapper-filter.js
   - components/unified-mapper/mapper-results.js
@@ -332,6 +328,12 @@ dashboard-js-files:
   - components/related-objects/related-people-access-control-group.js
   - components/custom-roles/custom-roles.js
   - components/custom-roles/custom-roles-modal.js
+  - components/inline/inline.js
+  - components/inline/readonly-inline-content.js
+  - components/inline/inline-form-control.js
+  - components/inline/base-inline-control-title.js
+  - components/assessment/info-pane/inline-item.js
+  - components/assessment/info-pane/confirm-inline-control-title.js
 
 app-init-files:
   - apps/dashboard.js
@@ -413,13 +415,10 @@ dashboard-js-template-files:
   - base_objects/search_actions.mustache
   - base_objects/search_result.mustache
   - base_objects/title.mustache
-  - base_objects/tree.mustache
   - base_objects/tree-item-attr.mustache
   - base_objects/tree_placeholder.mustache
   - base_objects/tree_footer_no_access.mustache
   - base_objects/tree_footer_zero.mustache
-  - base_objects/tree_header.mustache
-  - base_objects/tree_view_filter.mustache
   - base_objects/tree_column_selector.mustache
   - base_objects/tree_column_selector_3bbs.mustache
   - base_objects/tree_column_selector_body.mustache
@@ -427,7 +426,6 @@ dashboard-js-template-files:
   - base_objects/sub_tree_expand.mustache
   - base_objects/sub_tree_all_related_link.mustache
   - base_objects/generate_assessments_button.mustache
-  - base_objects/states.mustache
   - base_objects/form_restore.mustache
   - base_objects/info-pane-utility.mustache
   - base_objects/info_header.mustache
@@ -628,7 +626,6 @@ dashboard-js-template-files:
   - people/popover.mustache
   - people/tree-item-attr.mustache
   - people/tree_add_item.mustache
-  - people/tree_header.mustache
   - people/search_result.mustache
   - people/mapper-item-description.mustache
   - policies/info.mustache
@@ -694,6 +691,12 @@ dashboard-js-template-files:
   - components/people/editable-people-group.mustache
   - components/custom-roles/custom-roles.mustache
   - components/custom-roles/custom-roles-modal.mustache
+  - components/inline/inline.mustache
+  - components/inline/readonly-inline-content.mustache
+  - components/inline/simple-readonly-text.mustache
+  - components/inline/base-inline-control-title.mustache
+  - components/assessment/info-pane/inline-item.mustache
+  - components/assessment/info-pane/confirm-inline-control-title.mustache
 
 dashboard-css-files:
   - dashboard.css

@@ -48,7 +48,6 @@
     },
     tree_view_options: {
       show_view: GGRC.mustache_path + '/documents/tree.mustache',
-      footer_view: GGRC.mustache_path + '/base_objects/tree_footer.mustache',
       add_item_view: GGRC.mustache_path + '/documents/tree_add_item.mustache'
     },
     init: function () {

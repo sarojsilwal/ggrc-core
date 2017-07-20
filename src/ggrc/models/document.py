@@ -25,9 +25,10 @@ class Document(Ownable, Relatable, Base, Indexed, db.Model):
   title = deferred(db.Column(db.String), 'Document')
   link = deferred(db.Column(db.String), 'Document')
   description = deferred(db.Column(db.Text), 'Document')
-  kind_id = deferred(db.Column(db.Integer), 'Document')
-  year_id = deferred(db.Column(db.Integer), 'Document')
-  language_id = deferred(db.Column(db.Integer), 'Document')
+  kind_id = db.Column(db.Integer, db.ForeignKey('options.id'), nullable=True)
+  year_id = db.Column(db.Integer, db.ForeignKey('options.id'), nullable=True)
+  language_id = db.Column(db.Integer, db.ForeignKey('options.id'),
+                          nullable=True)
 
   URL = "URL"
   ATTACHMENT = "EVIDENCE"
@@ -41,18 +42,21 @@ class Document(Ownable, Relatable, Base, Indexed, db.Model):
       primaryjoin='and_(foreign(Document.kind_id) == Option.id, '
       'Option.role == "reference_type")',
       uselist=False,
+      lazy="joined",
   )
   year = db.relationship(
       'Option',
       primaryjoin='and_(foreign(Document.year_id) == Option.id, '
       'Option.role == "document_year")',
       uselist=False,
+      lazy="joined",
   )
   language = db.relationship(
       'Option',
       primaryjoin='and_(foreign(Document.language_id) == Option.id, '
       'Option.role == "language")',
       uselist=False,
+      lazy="joined",
   )
 
   _fulltext_attrs = [

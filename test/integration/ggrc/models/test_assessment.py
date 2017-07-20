@@ -210,7 +210,7 @@ class TestAssessmentGeneration(ggrc.TestCase):
       self.control = factories.ControlFactory(test_plan="Control Test Plan")
       self.snapshot = self._create_snapshots(self.audit, [self.control])[0]
 
-  def assessment_post(self, template=None):
+  def assessment_post(self, template=None, extra_data=None):
     """Helper function to POST an assessment"""
     assessment_dict = {
         "_generated": True,
@@ -233,6 +233,8 @@ class TestAssessmentGeneration(ggrc.TestCase):
           "id": template.id,
           "type": "AssessmentTemplate"
       }
+    if extra_data:
+      assessment_dict.update(extra_data)
 
     return self.api.post(all_models.Assessment, {
         "assessment": assessment_dict
@@ -717,3 +719,38 @@ class TestAssessmentGeneration(ggrc.TestCase):
       else:
         self.assertEqual([url.link for url in asmt.document_url], urls)
         self.assertEqual([ev.link for ev in asmt.document_evidence], evidences)
+
+  @ddt.data(
+      (None, "Control", "Control"),
+      (None, "Objective", "Objective"),
+      (None, None, "Control"),
+      ("Market", "Objective", "Market"),
+      ("Objective", "Control", "Objective"),
+      ("Objective", "Objective", "Objective"),
+      ("Objective", None, "Objective"),
+      ("Invalid Type", "Invalid Type", None),
+      (None, "Invalid Type", None),
+      ("Invalid Type", None, None),
+  )
+  @ddt.unpack
+  def test_generated_assessment_type(self, templ_type, obj_type, exp_type):
+    """Test assessment type for generated assessments"""
+    template = None
+    if templ_type:
+      template = factories.AssessmentTemplateFactory(
+          template_object_type=templ_type
+      )
+    assessment_type = None
+    if obj_type:
+      assessment_type = {"assessment_type": obj_type}
+
+    response = self.assessment_post(
+        template=template,
+        extra_data=assessment_type
+    )
+    if exp_type:
+      self.assertEqual(response.status_code, 201)
+      assessment = all_models.Assessment.query.first()
+      self.assertEqual(assessment.assessment_type, exp_type)
+    else:
+      self.assertEqual(response.status_code, 400)

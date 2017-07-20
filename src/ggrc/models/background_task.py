@@ -1,6 +1,9 @@
 # Copyright (C) 2017 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
+"""Module for ggrc background tasks."""
+
+import traceback
 from logging import getLogger
 from functools import wraps
 from time import time
@@ -18,11 +21,11 @@ from ggrc.models.mixins import Stateful
 from ggrc.models.types import CompressedType
 
 
-# pylint: disable=invalid-name
 logger = getLogger(__name__)
 
 
 class BackgroundTask(Base, Stateful, db.Model):
+  """Background task model."""
   __tablename__ = 'background_tasks'
 
   VALID_STATES = [
@@ -49,11 +52,13 @@ class BackgroundTask(Base, Stateful, db.Model):
   }
 
   def start(self):
+    """Mark the current task as running."""
     self.status = "Running"
     db.session.add(self)
     db.session.commit()
 
   def finish(self, status, result):
+    """Finish the current bg task."""
     # Ensure to not commit any not-yet-committed changes
     db.session.rollback()
 
@@ -70,6 +75,7 @@ class BackgroundTask(Base, Stateful, db.Model):
     db.session.commit()
 
   def make_response(self, default=None):
+    """Create task status response."""
     if self.result is None:
       return default
     from ggrc.app import app
@@ -78,7 +84,10 @@ class BackgroundTask(Base, Stateful, db.Model):
                               self.result['headers']))
 
 
-def create_task(name, url, queued_callback=None, parameters=None):
+def create_task(name, url, queued_callback=None, parameters=None, method=None):
+  """Create a enqueue a bacground task."""
+  if not method:
+    method = request.method
 
   # task name must be unique
   if not parameters:
@@ -99,32 +108,42 @@ def create_task(name, url, queued_callback=None, parameters=None):
         url=url,
         name="{}_{}".format(task.name, task.id),
         params={'task_id': task.id},
-        method=request.method,
-        headers=headers)
+        method=method,
+        headers=headers
+    )
   elif queued_callback:
     queued_callback(task)
   return task
 
 
 def make_task_response(id_):
+  """Make a response for a task with the given id."""
   task = BackgroundTask.query.get(id_)
   return task.make_response()
 
 
 def queued_task(func):
+  """Decorator for task queues."""
   from ggrc.app import app
 
   @wraps(func)
-  def decorated_view(*args, **kwargs):
-    if len(args) > 0 and isinstance(args[0], BackgroundTask):
+  def decorated_view(*args, **_):
+    """Background task runner.
+
+    This runner makes sure that the task is called with the task model as
+    the parameter.
+    """
+    if args and isinstance(args[0], BackgroundTask):
       task = args[0]
     else:
-      task = BackgroundTask.query.get(request.values.get("task_id"))
+      task_id = request.headers.get("X-Task-Id", request.values.get("task_id"))
+      task = BackgroundTask.query.get(task_id)
     task.start()
     try:
       result = func(task)
-    except:
-      import traceback
+    except:  # pylint: disable=bare-except
+      # Bare except is allowed here so that we can respond with the correct
+      # message to all exceptions.
       logger.exception("Task failed")
       task.finish("Failure", app.make_response((
           traceback.format_exc(), 200, [('Content-Type', 'text/html')])))

@@ -419,6 +419,9 @@
       label {
         color: $red;
       }
+      select {
+        border: 1px solid $red;
+      }
       .help-inline {
         margin: -8px 0 8px 0;
         display: block;
@@ -716,6 +719,10 @@
            margin-bottom: 0;
          }
        }
+       ul.diff-highlighted {
+         margin: 0;
+         padding: 0 0 0 30px;
+       }
        .diff-highlighted{
          display: block;
          width: 100%;
@@ -751,6 +758,7 @@
            .span3,
            .span4,
            .span6,
+           .span8,
            .span9,
            .span12{
              margin-left: 0;

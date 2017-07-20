@@ -9,7 +9,7 @@ from lib import base, decorator, environment
 from lib.constants import locator, url, objects
 from lib.entities.entity import CustomAttributeEntity
 from lib.utils import selenium_utils
-from lib.utils.string_utils import get_bool_from_string
+from lib.utils.string_utils import get_bool_value_from_arg
 
 
 class _Modal(base.Modal):
@@ -32,23 +32,6 @@ class _Modal(base.Modal):
     Return: WidgetAdminCustomAttributes
     """
     self.button_submit.click()
-
-
-class CreateNewCustomAttributeModal(base.Modal):
-  """Create new custom attribute modal."""
-  _locators = locator.ModalCustomAttribute
-
-  def __init__(self, driver):
-    super(CreateNewCustomAttributeModal, self).__init__(driver)
-    self.button_add_more = base.Button(
-        self._driver, self._locators.BUTTON_ADD_ANOTHER)
-
-  def save_and_add_another(self):
-    """
-    Return: ModalCustomAttributes
-    """
-    self.button_add_more.click_when_visible()
-    return self.__class__(self._driver)
 
 
 class CustomAttributesItemContent(base.Component):
@@ -88,7 +71,7 @@ class CustomAttributesItemContent(base.Component):
               title=attrs[0],
               type=objects.get_singular(objects.CUSTOM_ATTRIBUTES),
               attribute_type=attrs[1],
-              mandatory=get_bool_from_string(attrs[2]),
+              mandatory=get_bool_value_from_arg(attrs[2]),
               definition_type=self._item_name))
 
   def get_ca_list_from_group(self):

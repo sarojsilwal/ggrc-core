@@ -62,18 +62,30 @@
     {{/using}}
   {{/case}}
   {{#case 'assertions'}}
-    {{#using items=instance.assertions}}
-      {{#items}}
-        {{name}} &nbsp;
-      {{/items}}
-    {{/using}}
+    {{#if instance.snapshot}}
+      {{#instance.assertions}}
+        <span class="with-comma">{{display_name}}</span>
+      {{/instance.assertions}}
+    {{else}}
+      {{#using items=instance.assertions}}
+        {{#items}}
+          <span class="with-comma">{{display_name}}</span>
+        {{/items}}
+      {{/using}}
+    {{/if}}
   {{/case}}
   {{#case 'categories'}}
-    {{#using items=instance.categories}}
-      {{#items}}
-        {{name}} &nbsp;
-      {{/items}}
-    {{/using}}
+    {{#if instance.snapshot}}
+      {{#instance.categories}}
+        <span class="with-comma">{{display_name}}</span>
+      {{/instance.categories}}
+    {{else}}
+      {{#using items=instance.categories}}
+        {{#items}}
+          <span class="with-comma">{{display_name}}</span>
+        {{/items}}
+      {{/using}}
+    {{/if}}
   {{/case}}
   {{#case 'last_assessment_date'}}
     {{#if instance.snapshot}}

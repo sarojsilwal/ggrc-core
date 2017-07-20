@@ -8,12 +8,14 @@
 import copy
 import random
 
+from datetime import datetime
+
 from lib.constants import element, objects, roles, url as const_url
 from lib.constants.element import AdminWidgetCustomAttributes
 from lib.entities.entity import (
     Entity, PersonEntity, CustomAttributeEntity, ProgramEntity, ControlEntity,
     ObjectiveEntity, AuditEntity, AssessmentTemplateEntity, AssessmentEntity,
-    IssueEntity)
+    IssueEntity, CommentEntity)
 from lib.utils import string_utils
 from lib.utils.string_utils import (random_list_strings, random_string,
                                     random_uuid)
@@ -32,6 +34,7 @@ class EntitiesFactory(object):
   obj_asmt = unicode(objects.get_singular(objects.ASSESSMENTS, title=True))
   obj_issue = unicode(objects.get_singular(objects.ISSUES, title=True))
   obj_ca = unicode(objects.get_singular(objects.CUSTOM_ATTRIBUTES))
+  obj_comment = unicode(objects.get_singular(objects.COMMENTS, title=True))
 
   types_of_values_ui_like_attrs = (str, unicode, int)
   all_objs_attrs_names = Entity().get_attrs_names_for_entities()
@@ -64,6 +67,7 @@ class EntitiesFactory(object):
     [{'name': u'Ex1', ...}, {'name': u'Ex2', ...}] to u'Ex1, Ex2'
     """
     # pylint: disable=too-many-locals
+    # pylint: disable=undefined-loop-variable
     def convert_attr_value_from_dict_to_unicode(attr_name, attr_value):
       """Convert attribute value from dictionary to unicode representation
       (get value by key from dictionary 'attr_value' where key determine
@@ -73,7 +77,7 @@ class EntitiesFactory(object):
         converted_attr_value = attr_value
         if attr_name in [
             "contact", "manager", "owners", "assessor", "creator", "verifier",
-            "Assessor", "Creator", "Verifier"
+            "created_by", "modified_by", "Assessor", "Creator", "Verifier"
         ]:
           converted_attr_value = unicode(attr_value.get("name"))
         if attr_name in ["custom_attribute_definitions", "program", "audit",
@@ -86,6 +90,12 @@ class EntitiesFactory(object):
         if attr_name in ["custom_attribute_values"]:
           converted_attr_value = {attr_value.get("custom_attribute_id"):
                                   attr_value.get("attribute_value")}
+        if obj_attr_name == "comments":
+          converted_attr_value = {
+              k: (string_utils.convert_str_to_datetime(v) if
+                  k == "created_at" and isinstance(v, unicode) else v)
+              for k, v in attr_value.iteritems()
+              if k in ["modified_by", "created_at", "description"]}
         return converted_attr_value
     origin_obj = copy.deepcopy(obj)
     for obj_attr_name in obj.__dict__.keys():
@@ -93,13 +103,10 @@ class EntitiesFactory(object):
       obj_attr_value = (obj.assignees.get(obj_attr_name.title()) if (
           obj_attr_name in ["assessor", "creator", "verifier"] and
           "assignees" in obj.__dict__.keys()) else getattr(obj, obj_attr_name))
-      # u'2017-06-07T16:50:16' and u'2017-06-07 16:50:16' to u'06/07/2017'
-      if obj_attr_name == "updated_at" and isinstance(obj_attr_value, unicode):
-        delimeter = "T" if "T" in obj_attr_value else " "
-        obj_attr_value_as_list = (
-            str(obj_attr_value.split(delimeter)[0]).split('-'))
-        obj_attr_value = unicode(
-            "/".join(obj_attr_value_as_list[1:] + [obj_attr_value_as_list[0]]))
+      # u'2017-06-07T16:50:16' and u'2017-06-07 16:50:16' to datetime
+      if (obj_attr_name in ["updated_at", "created_at"] and
+              isinstance(obj_attr_value, unicode)):
+        obj_attr_value = string_utils.convert_str_to_datetime(obj_attr_value)
       if isinstance(obj_attr_value, dict) and obj_attr_value:
         # to "assignees" = {"Assessor": [], "Creator": [], "Verifier": []}
         if obj_attr_name == "assignees":
@@ -164,7 +171,7 @@ class EntitiesFactory(object):
   @classmethod
   def update_objs_attrs_values_by_entered_data(
       cls, objs, is_replace_attrs_values=True, is_allow_none_values=True,
-      **arguments
+      is_replace_values_of_dicts=False, **arguments
   ):
     """Update object or list of objects ('objs') attributes values by manually
     entered data if attribute name exist in 'attrs_names' witch equal to
@@ -173,18 +180,24 @@ class EntitiesFactory(object):
     if not 'is_replace_attrs_values' then update (merge) attributes values
     witch should be lists. If 'is_allow_none_values' then allow to set None
     object's attributes values, and vice versa.
+    If 'is_replace_values_of_dicts' then update values of dicts in list which
+    is value of particular object's attribute name:
+    (**arguments is attr={'key1': 'new_value2', 'key2': 'new_value2'}).
     """
     # pylint: disable=expression-not-assigned
     def update_obj_attrs_values(obj, is_replace_attrs_values,
                                 is_allow_none_values, **arguments):
       """Update object's attributes values."""
       for obj_attr_name in arguments:
-        if obj_attr_name in obj.__dict__.keys():
-          condition = (True if is_allow_none_values else
-                       arguments.get(obj_attr_name))
-          if condition:
-            obj_attr_value = cls.convert_obj_repr_from_obj_to_dict(
-                arguments.get(obj_attr_name))
+        if (obj_attr_name in
+                Entity().get_attrs_names_for_entities(obj.__class__)):
+          _obj_attr_value = arguments.get(obj_attr_name)
+          condition = (True if is_allow_none_values else _obj_attr_value)
+          if condition and not is_replace_values_of_dicts:
+            # convert repr from objects to dicts exclude datetime objects
+            obj_attr_value = (
+                cls.convert_obj_repr_from_obj_to_dict(_obj_attr_value) if
+                not isinstance(_obj_attr_value, datetime) else _obj_attr_value)
             if not is_replace_attrs_values:
               origin_obj_attr_value = getattr(obj, obj_attr_name)
               obj_attr_value = (
@@ -192,6 +205,16 @@ class EntitiesFactory(object):
                   if obj_attr_name == "custom_attributes" else
                   string_utils.convert_to_list(origin_obj_attr_value) +
                   string_utils.convert_to_list(obj_attr_value))
+            setattr(obj, obj_attr_name, obj_attr_value)
+          if is_replace_values_of_dicts and isinstance(_obj_attr_value, dict):
+            obj_attr_value = string_utils.exchange_dicts_items(
+                transform_dict=_obj_attr_value,
+                dicts=string_utils.convert_to_list(
+                    getattr(obj, obj_attr_name)),
+                is_keys_not_values=False)
+            obj_attr_value = (
+                obj_attr_value if isinstance(getattr(obj, obj_attr_name), list)
+                else obj_attr_value[0])
             setattr(obj, obj_attr_name, obj_attr_value)
       return obj
     if objs and arguments:
@@ -236,6 +259,43 @@ class EntitiesFactory(object):
     """Generate email in unicode format according to domain."""
     return unicode("{mail_name}@{domain}".format(
         mail_name=random_uuid(), domain=domain))
+
+
+class CommentsFactory(EntitiesFactory):
+  """Factory class for Comments entities."""
+  # pylint: disable=too-many-locals
+
+  obj_attrs_names = Entity().get_attrs_names_for_entities(CommentEntity)
+
+  @classmethod
+  def create_empty(cls):
+    """Create blank Comment object."""
+    empty_comment = CommentEntity()
+    empty_comment.type = cls.obj_comment
+    return empty_comment
+
+  @classmethod
+  def create(cls, type=None, id=None, href=None, modified_by=None,
+             created_at=None, description=None):
+    """Create Comment object.
+    Random values will be used for description.
+    Predictable values will be used for type, owners, modified_by.
+    """
+    comment_entity = cls._create_random_comment()
+    comment_entity = cls.update_objs_attrs_values_by_entered_data(
+        objs=comment_entity, is_allow_none_values=False, type=type, id=id,
+        href=href, modified_by=modified_by,
+        created_at=created_at, description=description)
+    return comment_entity
+
+  @classmethod
+  def _create_random_comment(cls):
+    """Create Comment entity with randomly and predictably filled fields."""
+    random_comment = CommentEntity()
+    random_comment.type = cls.obj_comment
+    random_comment.modified_by = ObjectPersonsFactory().default().__dict__
+    random_comment.description = cls.generate_string(cls.obj_comment)
+    return random_comment
 
 
 class ObjectPersonsFactory(EntitiesFactory):
@@ -505,7 +565,6 @@ class ControlsFactory(EntitiesFactory):
     random_control.title = cls.generate_string(cls.obj_control)
     random_control.slug = cls.generate_slug()
     random_control.status = unicode(element.ObjectStates.DRAFT)
-    random_control.contact = ObjectPersonsFactory().default().__dict__
     random_control.owners = [ObjectPersonsFactory().default().__dict__]
     return random_control
 
@@ -532,7 +591,7 @@ class ObjectivesFactory(EntitiesFactory):
              custom_attributes=None):
     """Create Objective object.
     Random values will be used for title and slug.
-    Predictable values will be used for type, status, owners and contact.
+    Predictable values will be used for type, status, owners.
     """
     objective_entity = cls._create_random_objective()
     objective_entity = cls.update_objs_attrs_values_by_entered_data(
@@ -553,7 +612,6 @@ class ObjectivesFactory(EntitiesFactory):
     random_objective.title = cls.generate_string(cls.obj_objective)
     random_objective.slug = cls.generate_slug()
     random_objective.status = unicode(element.ObjectStates.DRAFT)
-    random_objective.contact = ObjectPersonsFactory().default().__dict__
     random_objective.owners = [ObjectPersonsFactory().default().__dict__]
     return random_objective
 
@@ -639,8 +697,8 @@ class AssessmentTemplatesFactory(EntitiesFactory):
 
   @classmethod
   def create(cls, type=None, id=None, title=None, href=None, url=None,
-             slug=None, audit=None, default_people=None, verifiers=None,
-             assessors=None, template_object_type=None, updated_at=None,
+             slug=None, audit=None, default_people=None,
+             template_object_type=None, updated_at=None,
              custom_attribute_definitions=None, custom_attribute_values=None,
              custom_attributes=None):
     """Create Assessment Template object.
@@ -653,9 +711,8 @@ class AssessmentTemplatesFactory(EntitiesFactory):
     asmt_tmpl_entity = cls.update_objs_attrs_values_by_entered_data(
         objs=asmt_tmpl_entity, is_allow_none_values=False, type=type, id=id,
         title=title, href=href, url=url, slug=slug, audit=audit,
-        default_people=default_people, verifiers=verifiers,
-        assessors=assessors, template_object_type=template_object_type,
-        updated_at=updated_at,
+        default_people=default_people,
+        template_object_type=template_object_type, updated_at=updated_at,
         custom_attribute_definitions=custom_attribute_definitions,
         custom_attribute_values=custom_attribute_values,
         custom_attributes=custom_attributes)
@@ -669,6 +726,7 @@ class AssessmentTemplatesFactory(EntitiesFactory):
     random_asmt_tmpl = AssessmentTemplateEntity()
     random_asmt_tmpl.type = cls.obj_asmt_tmpl
     random_asmt_tmpl.title = cls.generate_string(cls.obj_asmt_tmpl)
+    random_asmt_tmpl.assessors = unicode(roles.AUDIT_LEAD)
     random_asmt_tmpl.slug = cls.generate_slug()
     random_asmt_tmpl.template_object_type = cls.obj_control.title()
     random_asmt_tmpl.default_people = {"verifiers": unicode(roles.AUDITORS),
@@ -715,8 +773,7 @@ class AssessmentsFactory(EntitiesFactory):
   @classmethod
   def create(cls, type=None, id=None, title=None, href=None, url=None,
              slug=None, status=None, owners=None, audit=None,
-             recipients=None, assignees=None, assessor=None, creator=None,
-             verifier=None, verified=None, updated_at=None,
+             recipients=None, assignees=None, verified=None, updated_at=None,
              objects_under_assessment=None, os_state=None,
              custom_attribute_definitions=None, custom_attribute_values=None,
              custom_attributes=None):
@@ -731,7 +788,6 @@ class AssessmentsFactory(EntitiesFactory):
         objs=asmt_entity, is_allow_none_values=False, type=type, id=id,
         title=title, href=href, url=url, slug=slug, status=status,
         owners=owners, audit=audit, recipients=recipients, assignees=assignees,
-        assessor=assessor, creator=creator, verifier=verifier,
         verified=verified, updated_at=updated_at,
         objects_under_assessment=objects_under_assessment, os_state=os_state,
         custom_attribute_definitions=custom_attribute_definitions,
@@ -751,7 +807,6 @@ class AssessmentsFactory(EntitiesFactory):
         (unicode(roles.ASSESSOR), unicode(roles.CREATOR),
          unicode(roles.VERIFIER)))
     random_asmt.verified = False
-    random_asmt.owners = [ObjectPersonsFactory().default().__dict__]
     random_asmt.assignees = {
         "Assessor": [ObjectPersonsFactory().default().__dict__],
         "Creator": [ObjectPersonsFactory().default().__dict__]}

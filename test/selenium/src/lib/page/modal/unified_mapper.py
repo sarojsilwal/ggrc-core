@@ -72,7 +72,7 @@ class CommonUnifiedMapperModal(base.Modal):
         self._locators.FOUND_OBJECTS_CHECKBOXES)
     return (
         dest_objs.get_mapping_statuses() if
-        self.tree_view.get_tree_view_items_elements() else [])
+        self.tree_view.tree_view_items() else [])
 
   def _confirm_map_selected(self):
     """Select Map Selected button to confirm map selected objects to

@@ -61,10 +61,10 @@ WRONG_REQUIRED_VALUE = (u"Line {line}: Required field {column_name} contains"
                         u" invalid data '{value}'. The default value will be"
                         u" used.")
 
-MISSING_VALUE_WARNING = (u"Line {line}: Field {column_name} is required. The "
-                         u"default value '{default_value}' will be used.")
+MISSING_VALUE_WARNING = (u"Line {line}: Field '{column_name}' is required. "
+                         u"The default value '{default_value}' will be used.")
 
-MISSING_VALUE_ERROR = (u"Line {line}: Field {column_name} is required. The "
+MISSING_VALUE_ERROR = (u"Line {line}: Field '{column_name}' is required. The "
                        u"line will be ignored.")
 
 PERMISSION_ERROR = (u"Line {line}: You don't have permission to update/delete"

@@ -10,39 +10,38 @@
     tag: 'object-search',
     template: can.view(GGRC.mustache_path +
       '/components/object-search/object-search.mustache'),
-    scope: function (attrs, parentScope, el) {
-      var data = {
-        search_only: true,
-        object: 'MultitypeSearch',
-        type: 'Program'
-      };
-
-      return {
+    viewModel: function () {
+      return GGRC.VM.ObjectOperationsBaseVM.extend({
         isLoadingOrSaving: function () {
-          return this.attr('mapper.is_loading');
+          return this.attr('is_loading');
         },
-        mapper: new GGRC.Models.MapperModel(data)
-      };
+        object: 'MultitypeSearch',
+        type: 'Program',
+        availableTypes: function () {
+          var types = GGRC.Mappings.getMappingTypes(
+            this.attr('object'),
+            ['TaskGroupTask', 'TaskGroup', 'CycleTaskGroupObjectTask'],
+            []);
+          return types;
+        }
+      });
     },
-
     events: {
       inserted: function () {
         this.setModel();
-        this.scope.attr('mapper').afterShown();
+        this.viewModel.afterShown();
       },
       setModel: function () {
-        var type = this.scope.attr('mapper.type');
+        var type = this.viewModel.attr('type');
 
-        this.scope.attr(
-          'mapper.model', this.scope.mapper.modelFromType(type));
+        this.viewModel.attr('model', this.viewModel.modelFromType(type));
       },
-      '{mapper} type': function () {
-        var mapper = this.scope.attr('mapper');
-        mapper.attr('filter', '');
-        mapper.attr('afterSearch', false);
-        mapper.attr('relevant').replace([]);
+      '{viewModel} type': function () {
+        this.viewModel.attr('filter', '');
+        this.viewModel.attr('afterSearch', false);
+        this.viewModel.attr('relevant').replace([]);
         this.setModel();
-        setTimeout(mapper.onSubmit.bind(mapper));
+        setTimeout(this.viewModel.onSubmit.bind(this.viewModel));
       }
     }
   });
